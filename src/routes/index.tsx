@@ -1,24 +1,925 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Phone,
+  MessageCircle,
+  MapPin,
+  Clock,
+  Star,
+  ChevronRight,
+  Download,
+  Users,
+  Flame,
+  Leaf,
+  Award,
+  Mountain,
+  Utensils,
+  Wine,
+  Sparkles,
+} from "lucide-react";
+import ambienceHero from "@/assets/ambience-hero.png";
+import ambience2 from "@/assets/ambience-2.png";
+import ambienceTea from "@/assets/ambience-tea.png";
+import chefPortrait from "@/assets/chef.png";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+const PHONE = "8587044000";
+const PHONE_DISPLAY = "+91 85870 44000";
+const WA = "918587044000";
+const MAPS_URL = "https://maps.app.goo.gl/NzuvBuMyLjCGQ7UT8";
+const ADDRESS = "McLeod Ganj, Dharamshala, Himachal Pradesh";
+const HOURS = { open: 8, close: 23 }; // 8am – 11pm
+
+const wa = (msg: string) =>
+  `https://wa.me/${WA}?text=${encodeURIComponent(msg)}`;
+
+// ─── Menu data ──────────────────────────────────────────────────────────
+type Dish = { name: string; price: number; desc?: string };
+const MENU: { category: string; items: Dish[] }[] = [
+  {
+    category: "Starters",
+    items: [
+      { name: "Veg Spring Rolls", price: 180 },
+      { name: "Paneer Tikka", price: 320 },
+      { name: "Hara Bhara Kebab", price: 280 },
+      { name: "Chicken Tikka", price: 380 },
+      { name: "Fish Fingers", price: 450 },
+    ],
+  },
+  {
+    category: "Soups",
+    items: [
+      { name: "Tomato Soup", price: 150 },
+      { name: "Sweet Corn Soup", price: 170 },
+      { name: "Hot & Sour Soup", price: 180 },
+      { name: "Chicken Clear Soup", price: 220 },
+    ],
+  },
+  {
+    category: "Vegetarian Mains",
+    items: [
+      { name: "Dal Tadka", price: 250 },
+      { name: "Dal Makhani", price: 320 },
+      { name: "Jeera Aloo", price: 220 },
+      { name: "Mix Veg Curry", price: 280 },
+      { name: "Kadai Paneer", price: 340 },
+      { name: "Shahi Paneer", price: 350 },
+      { name: "Paneer Butter Masala", price: 360 },
+      { name: "Palak Paneer", price: 340 },
+      { name: "Malai Kofta", price: 360 },
+    ],
+  },
+  {
+    category: "Non-Vegetarian Mains",
+    items: [
+      { name: "Butter Chicken", price: 520 },
+      { name: "Chicken Curry", price: 480 },
+      { name: "Kadai Chicken", price: 500 },
+      { name: "Chicken Tikka Masala", price: 540 },
+      { name: "Mutton Rogan Josh", price: 680 },
+      { name: "Fish Curry", price: 580 },
+    ],
+  },
+  {
+    category: "Rice & Biryani",
+    items: [
+      { name: "Steamed Rice", price: 180 },
+      { name: "Jeera Rice", price: 220 },
+      { name: "Veg Pulao", price: 260 },
+      { name: "Veg Biryani", price: 320 },
+      { name: "Chicken Biryani", price: 480 },
+      { name: "Mutton Biryani", price: 620 },
+    ],
+  },
+  {
+    category: "Breads",
+    items: [
+      { name: "Tandoori Roti", price: 35 },
+      { name: "Butter Roti", price: 45 },
+      { name: "Butter Naan", price: 80 },
+      { name: "Garlic Naan", price: 110 },
+      { name: "Lachha Paratha", price: 100 },
+    ],
+  },
+  {
+    category: "Chinese",
+    items: [
+      { name: "Veg Hakka Noodles", price: 260 },
+      { name: "Chicken Hakka Noodles", price: 340 },
+      { name: "Veg Fried Rice", price: 250 },
+      { name: "Chicken Fried Rice", price: 320 },
+    ],
+  },
+  {
+    category: "Desserts & Beverages",
+    items: [
+      { name: "Gulab Jamun (2 pcs)", price: 120 },
+      { name: "Brownie with Ice Cream", price: 260 },
+      { name: "Cold Coffee", price: 180 },
+      { name: "Fresh Lime Soda", price: 90 },
+    ],
+  },
+];
+
+const SIGNATURE: (Dish & { tag: string; blurb: string })[] = [
+  { name: "Butter Chicken", price: 520, tag: "House Favourite", blurb: "Slow-simmered tomato, cream, kissed by charcoal." },
+  { name: "Mutton Rogan Josh", price: 680, tag: "Kashmiri", blurb: "Deep spice, patience, and mountain lamb." },
+  { name: "Paneer Butter Masala", price: 360, tag: "Vegetarian", blurb: "Silken cottage cheese, velvet gravy." },
+  { name: "Chicken Biryani", price: 480, tag: "Dum-cooked", blurb: "Long-grain basmati layered over saffron." },
+  { name: "Malai Kofta", price: 360, tag: "Editor's Pick", blurb: "Delicate dumplings in a cashew-rich sauce." },
+  { name: "Kadai Paneer", price: 340, tag: "Fiery", blurb: "Bell peppers, crushed spice, the wok's roar." },
+];
+
+const PICK_ROTATION = [
+  { name: "Mutton Rogan Josh", desc: "Tender lamb braised in Kashmiri chillies and yoghurt." },
+  { name: "Butter Chicken", desc: "The dish that made the north famous." },
+  { name: "Paneer Butter Masala", desc: "Cream, tomato, cardamom — the trinity." },
+  { name: "Chicken Biryani", desc: "Layered dum, saffron, mint, patience." },
+  { name: "Kadai Chicken", desc: "Wok-tossed with roasted whole spice." },
+  { name: "Malai Kofta", desc: "Cottage-cheese dumplings in a nut-thick gravy." },
+  { name: "Fish Curry", desc: "Himalayan trout in mustard and curry leaf." },
+];
+
+const REVIEWS = [
+  { text: "Warm, dim, and the butter chicken is exactly right. We walked here twice in one week.", name: "Aditi R.", src: "Google" },
+  { text: "A proper meal after a long trek. The mutton rogan josh is worth the climb up.", name: "James P.", src: "TripAdvisor" },
+  { text: "Family friendly, quiet corners, and the staff remember your order the next night.", name: "Meera S.", src: "Zomato" },
+];
+
+const GALLERY = [ambienceHero, ambience2, ambienceTea];
+
+// ─── helpers ────────────────────────────────────────────────────────────
+function useOpenStatus() {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const check = () => {
+      const h = new Date().getHours();
+      setOpen(h >= HOURS.open && h < HOURS.close);
+    };
+    check();
+    const id = setInterval(check, 60_000);
+    return () => clearInterval(id);
+  }, []);
+  return open;
+}
+
+function pickOfTheDay() {
+  const start = new Date(new Date().getFullYear(), 0, 0);
+  const diff = Number(new Date()) - Number(start);
+  const day = Math.floor(diff / 86_400_000);
+  return PICK_ROTATION[day % PICK_ROTATION.length];
+}
+
+// ─── UI primitives ──────────────────────────────────────────────────────
+function Btn({
+  children,
+  href,
+  variant = "primary",
+  className = "",
+  onClick,
+  type,
+}: {
+  children: React.ReactNode;
+  href?: string;
+  variant?: "primary" | "ghost" | "outline";
+  className?: string;
+  onClick?: () => void;
+  type?: "button" | "submit";
+}) {
+  const base =
+    "inline-flex items-center justify-center gap-2 px-6 py-3 text-[13px] tracking-[0.18em] uppercase transition-all duration-300";
+  const styles = {
+    primary: "bg-ember text-obsidian hover:bg-bone",
+    ghost: "text-bone hover:text-ember",
+    outline: "border border-bone/30 text-bone hover:border-ember hover:text-ember",
+  }[variant];
+  const cls = `${base} ${styles} ${className}`;
+  if (href) return <a href={href} className={cls} onClick={onClick}>{children}</a>;
+  return <button type={type ?? "button"} onClick={onClick} className={cls}>{children}</button>;
+}
+
+function Overline({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
+    <div className="flex items-center gap-3 text-[11px] tracking-[0.32em] uppercase text-ember">
+      <span className="h-px w-8 bg-ember/60" />
+      <span>{children}</span>
+    </div>
+  );
+}
+
+// ─── Page ───────────────────────────────────────────────────────────────
+function Index() {
+  const isOpen = useOpenStatus();
+  const pick = useMemo(pickOfTheDay, []);
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <Header isOpen={isOpen} />
+      <Hero isOpen={isOpen} />
+      <About />
+      <Signature />
+      <PickAndRecipe pick={pick} />
+      <FullMenu />
+      <WhyUs />
+      <Chef />
+      <Testimonials />
+      <Gallery />
+      <Extras />
+      <Reserve />
+      <Contact isOpen={isOpen} />
+      <Footer />
+      <MobileCallBar />
+    </div>
+  );
+}
+
+// ─── Header ─────────────────────────────────────────────────────────────
+function Header({ isOpen }: { isOpen: boolean }) {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    onScroll();
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const nav = [
+    ["Home", "#home"],
+    ["About", "#about"],
+    ["Menu", "#menu"],
+    ["Gallery", "#gallery"],
+    ["Reserve", "#reserve"],
+    ["Extras", "#extras"],
+    ["Contact", "#contact"],
+  ];
+
+  return (
+    <header
+      className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
+        scrolled ? "bg-obsidian/85 backdrop-blur-md py-3" : "bg-transparent py-5"
+      }`}
     >
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6">
+        <a href="#home" className="flex items-baseline gap-2">
+          <span className="font-display text-2xl font-light tracking-wide text-bone">The Den</span>
+          <span className="hidden sm:inline text-[10px] tracking-[0.3em] uppercase text-ember">Est. 2015</span>
+        </a>
+        <nav className="hidden lg:flex items-center gap-8">
+          {nav.map(([label, href]) => (
+            <a
+              key={href}
+              href={href}
+              className="text-[11px] tracking-[0.28em] uppercase text-bone/70 hover:text-ember transition-colors"
+            >
+              {label}
+            </a>
+          ))}
+        </nav>
+        <div className="flex items-center gap-2">
+          <span className={`hidden md:flex items-center gap-2 text-[10px] tracking-[0.24em] uppercase ${isOpen ? "text-glass" : "text-bone/50"}`}>
+            <span className={`h-1.5 w-1.5 rounded-full ${isOpen ? "bg-glass animate-pulse" : "bg-bone/40"}`} />
+            {isOpen ? "Open" : "Closed"}
+          </span>
+          <a href={`tel:${PHONE}`} aria-label="Call" className="p-2.5 text-bone hover:text-ember transition-colors">
+            <Phone size={18} strokeWidth={1.5} />
+          </a>
+          <a href={wa("Hello! I'd like to make an enquiry with The Den.")} target="_blank" rel="noopener" aria-label="WhatsApp" className="p-2.5 text-bone hover:text-ember transition-colors">
+            <MessageCircle size={18} strokeWidth={1.5} />
+          </a>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+// ─── Hero ───────────────────────────────────────────────────────────────
+function Hero({ isOpen }: { isOpen: boolean }) {
+  return (
+    <section id="home" className="relative min-h-dvh flex items-end overflow-hidden">
       <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
+        src={ambienceHero}
+        alt="The Den — candlelit interior, McLeod Ganj"
+        className="absolute inset-0 h-full w-full object-cover"
       />
+      <div className="absolute inset-0 bg-gradient-to-b from-obsidian/70 via-obsidian/40 to-obsidian" />
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-20 pt-32 sm:pb-28">
+        <div className="max-w-3xl fade-up">
+          <Overline>McLeod Ganj · Est. 2015</Overline>
+          <h1 className="mt-6 font-display text-6xl sm:text-7xl md:text-8xl font-light leading-[0.95] text-bone text-balance">
+            A candlelit table<br />
+            <span className="italic text-ember">in the mountains.</span>
+          </h1>
+          <p className="mt-6 max-w-xl text-lg text-bone/80 leading-relaxed">
+            Slow food from the north, wok-tossed classics from the east, and a room that lingers
+            long after the plates are cleared.
+          </p>
+          <p className="mt-3 text-sm text-bone/60 italic">
+            Indian · Chinese · Continental — served nightly, by the fire.
+          </p>
+          <div className="mt-10 flex flex-wrap gap-3">
+            <Btn href="#reserve">Reserve a Table</Btn>
+            <Btn href="#menu" variant="outline">Explore the Menu <ChevronRight size={14} /></Btn>
+          </div>
+        </div>
+      </div>
+
+      {/* Trust strip */}
+      <div className="absolute bottom-0 inset-x-0 z-10 border-t border-bone/10 bg-obsidian/60 backdrop-blur-sm">
+        <div className="mx-auto max-w-7xl px-6 py-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          <div>
+            <div className="flex items-center justify-center gap-1 text-ember">
+              {[...Array(5)].map((_, i) => <Star key={i} size={12} fill="currentColor" strokeWidth={0} />)}
+            </div>
+            <div className="mt-1 text-[10px] tracking-[0.24em] uppercase text-bone/60">4.7 · 820+ reviews</div>
+          </div>
+          <div>
+            <div className="font-display text-xl text-bone">₹₹</div>
+            <div className="text-[10px] tracking-[0.24em] uppercase text-bone/60">Mid-range · ₹500–900 pp</div>
+          </div>
+          <div>
+            <div className={`font-display text-xl ${isOpen ? "text-glass" : "text-bone/60"}`}>
+              {isOpen ? "Open Now" : "Closed"}
+            </div>
+            <div className="text-[10px] tracking-[0.24em] uppercase text-bone/60">Daily · 8am – 11pm</div>
+          </div>
+          <div>
+            <div className="font-display text-xl text-bone">10 yrs</div>
+            <div className="text-[10px] tracking-[0.24em] uppercase text-bone/60">Feeding the town</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── About ──────────────────────────────────────────────────────────────
+function About() {
+  return (
+    <section id="about" className="py-28 sm:py-40">
+      <div className="mx-auto max-w-7xl px-6 grid lg:grid-cols-12 gap-12 lg:gap-20 items-start">
+        <div className="lg:col-span-5 lg:sticky lg:top-32">
+          <img src={ambience2} alt="Interior at The Den" className="w-full aspect-[4/5] object-cover" />
+        </div>
+        <div className="lg:col-span-7 lg:pt-12">
+          <Overline>Our Story</Overline>
+          <h2 className="mt-6 font-display text-5xl sm:text-6xl font-light leading-tight text-balance">
+            Ten winters of woodsmoke,<br />
+            <span className="italic text-ember">and one long menu.</span>
+          </h2>
+          <div className="mt-8 space-y-5 text-lg text-bone/75 leading-relaxed max-w-xl">
+            <p>
+              The Den opened its doors in 2015 as a small kitchen with a large ambition:
+              to feed McLeod Ganj the food it actually wanted at the end of a long day
+              on the mountain.
+            </p>
+            <p>
+              A decade later, our copper pots and tandoor are still the loudest thing in
+              the room — everything else is candlelight, low music, and the quiet company
+              of people you'd like to eat again with tomorrow.
+            </p>
+          </div>
+          <div className="mt-14 grid grid-cols-2 sm:grid-cols-4 gap-8 border-t border-bone/10 pt-10">
+            {[
+              ["820+", "Reviews"],
+              ["4.7", "Rating"],
+              ["10", "Years"],
+              ["100%", "Family friendly"],
+            ].map(([n, l]) => (
+              <div key={l}>
+                <div className="font-display text-4xl font-light text-bone">{n}</div>
+                <div className="mt-1 text-[10px] tracking-[0.24em] uppercase text-bone/50">{l}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Signature dishes ───────────────────────────────────────────────────
+function Signature() {
+  return (
+    <section className="py-28 border-t border-bone/10">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <div>
+            <Overline>The Kitchen's Favourites</Overline>
+            <h2 className="mt-4 font-display text-5xl font-light">Signature dishes.</h2>
+          </div>
+          <a href="#menu" className="text-[11px] tracking-[0.28em] uppercase text-ember hover:text-bone transition-colors inline-flex items-center gap-2">
+            Full menu <ChevronRight size={14} />
+          </a>
+        </div>
+        <div className="mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-14">
+          {SIGNATURE.map((d) => (
+            <article key={d.name} className="group">
+              <div className="flex items-baseline justify-between gap-4 border-b border-bone/15 pb-3">
+                <h3 className="font-display text-2xl text-bone group-hover:text-ember transition-colors">{d.name}</h3>
+                <span className="font-display text-xl text-ember whitespace-nowrap">₹{d.price}</span>
+              </div>
+              <div className="mt-3 flex items-center gap-3 text-[10px] tracking-[0.24em] uppercase text-bone/50">
+                <span>{d.tag}</span>
+              </div>
+              <p className="mt-4 text-bone/70 leading-relaxed">{d.blurb}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Pick of the day + Recipe spotlight ─────────────────────────────────
+function PickAndRecipe({ pick }: { pick: { name: string; desc: string } }) {
+  return (
+    <section className="py-28 border-t border-bone/10 bg-card">
+      <div className="mx-auto max-w-7xl px-6 grid lg:grid-cols-2 gap-16">
+        {/* Pick of the day */}
+        <div className="relative border border-ember/30 p-10 sm:p-14">
+          <div className="absolute -top-3 left-8 bg-card px-3 text-[10px] tracking-[0.32em] uppercase text-ember">
+            Pick of the Day
+          </div>
+          <Sparkles size={22} className="text-ember" strokeWidth={1.5} />
+          <h3 className="mt-6 font-display text-4xl sm:text-5xl font-light leading-tight text-bone">
+            {pick.name}
+          </h3>
+          <p className="mt-5 text-lg text-bone/75 leading-relaxed max-w-md">{pick.desc}</p>
+          <p className="mt-8 text-[11px] tracking-[0.28em] uppercase text-bone/50">
+            Chef's choice · Refreshed daily
+          </p>
+        </div>
+
+        {/* Recipe spotlight */}
+        <div>
+          <Overline>Recipe Spotlight</Overline>
+          <h3 className="mt-4 font-display text-4xl font-light">Paneer Butter Masala.</h3>
+          <p className="mt-3 text-bone/70 italic">A house recipe, unhurried.</p>
+
+          <div className="mt-10 grid sm:grid-cols-2 gap-8">
+            <div>
+              <h4 className="text-[10px] tracking-[0.28em] uppercase text-ember">Ingredients</h4>
+              <ul className="mt-4 space-y-2 text-bone/75 text-sm">
+                {[
+                  "250g paneer, cubed",
+                  "4 ripe tomatoes",
+                  "2 tbsp cashews, soaked",
+                  "50ml cream",
+                  "2 tbsp butter",
+                  "1 tsp kasuri methi",
+                  "Cardamom, cinnamon, salt",
+                ].map((i) => (
+                  <li key={i} className="flex gap-3">
+                    <span className="text-ember/60">·</span>{i}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-[10px] tracking-[0.28em] uppercase text-ember">Method</h4>
+              <ol className="mt-4 space-y-3 text-bone/75 text-sm">
+                {[
+                  "Blanch tomatoes and cashews; blend to a silk purée.",
+                  "Melt butter with whole spices; sweat, don't brown.",
+                  "Add purée, simmer until it darkens by two shades.",
+                  "Slip in paneer, cream, and crushed kasuri methi.",
+                  "Rest five minutes off the flame. Serve with naan.",
+                ].map((s, i) => (
+                  <li key={i} className="flex gap-4">
+                    <span className="font-display text-ember w-5">{i + 1}</span>
+                    <span>{s}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Full menu ──────────────────────────────────────────────────────────
+function FullMenu() {
+  const [active, setActive] = useState(MENU[0].category);
+  const current = MENU.find((m) => m.category === active) ?? MENU[0];
+
+  return (
+    <section id="menu" className="py-28 border-t border-bone/10">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="grid lg:grid-cols-12 gap-12">
+          <div className="lg:col-span-4">
+            <Overline>The Menu</Overline>
+            <h2 className="mt-4 font-display text-5xl sm:text-6xl font-light leading-tight">
+              Read it like<br /><span className="italic text-ember">a good letter.</span>
+            </h2>
+            <nav className="mt-10 flex flex-col gap-1">
+              {MENU.map((s) => (
+                <button
+                  key={s.category}
+                  onClick={() => setActive(s.category)}
+                  className={`text-left py-2 pl-4 border-l text-sm tracking-wide transition-all ${
+                    active === s.category
+                      ? "border-ember text-ember"
+                      : "border-bone/10 text-bone/60 hover:text-bone hover:border-bone/40"
+                  }`}
+                >
+                  {s.category}
+                </button>
+              ))}
+            </nav>
+            <a
+              href="#"
+              onClick={(e) => { e.preventDefault(); alert("PDF menu coming soon. WhatsApp us for the latest."); }}
+              className="mt-10 inline-flex items-center gap-2 text-[11px] tracking-[0.28em] uppercase text-ember hover:text-bone transition-colors"
+            >
+              <Download size={14} /> Download PDF Menu
+            </a>
+          </div>
+
+          <div className="lg:col-span-8">
+            <div className="border-t border-bone/10 pt-8">
+              <h3 className="font-display text-3xl text-bone mb-8">{current.category}</h3>
+              <ul className="divide-y divide-bone/10">
+                {current.items.map((d) => (
+                  <li key={d.name} className="py-5 flex items-baseline gap-6">
+                    <span className="font-display text-lg text-bone flex-1">{d.name}</span>
+                    <span className="hidden sm:block flex-1 border-b border-dotted border-bone/20 mb-2" />
+                    <span className="font-display text-lg text-ember whitespace-nowrap">₹{d.price}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Why us ─────────────────────────────────────────────────────────────
+function WhyUs() {
+  const items = [
+    [Flame, "Tandoor to table", "Char, smoke, and speed — the way it should arrive."],
+    [Leaf, "Local mountain produce", "Sourced from Kangra valley farms whenever the season allows."],
+    [Wine, "Considered pours", "A short list of wines and cocktails, chosen not stocked."],
+    [Users, "Family-friendly", "Quiet corners, high chairs, and a menu for smaller appetites."],
+    [Mountain, "Locals-first", "Ten years of regulars — we remember your order."],
+    [Award, "Consistently rated", "4.7 across Google, Zomato and Tripadvisor."],
+    [Utensils, "Multi-cuisine", "North Indian, Chinese and Continental, done properly."],
+    [Clock, "Long hours", "Open 8am to 11pm, every day of the year."],
+  ] as const;
+  return (
+    <section className="py-28 border-t border-bone/10">
+      <div className="mx-auto max-w-7xl px-6">
+        <Overline>Why The Den</Overline>
+        <h2 className="mt-4 font-display text-5xl font-light">Reasons to come back.</h2>
+        <div className="mt-16 grid sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+          {items.map(([Icon, title, blurb]) => (
+            <div key={title}>
+              <Icon size={22} strokeWidth={1.25} className="text-ember" />
+              <h3 className="mt-4 font-display text-xl text-bone">{title}</h3>
+              <p className="mt-2 text-sm text-bone/65 leading-relaxed">{blurb}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Chef ───────────────────────────────────────────────────────────────
+function Chef() {
+  return (
+    <section className="py-28 border-t border-bone/10 bg-card">
+      <div className="mx-auto max-w-7xl px-6 grid lg:grid-cols-12 gap-12 items-center">
+        <div className="lg:col-span-5">
+          <img src={chefPortrait} alt="Head Chef, The Den" className="w-full aspect-[4/5] object-cover" />
+        </div>
+        <div className="lg:col-span-7 lg:pl-8">
+          <Overline>Meet the Chef</Overline>
+          <h2 className="mt-4 font-display text-5xl font-light leading-tight">
+            The hand behind<br /><span className="italic text-ember">every plate.</span>
+          </h2>
+          <p className="mt-8 text-lg text-bone/75 leading-relaxed max-w-lg">
+            Our head chef has spent fifteen years chasing flavour across three cuisines —
+            trained in a Delhi kitchen, sharpened in Kolkata's Chinatown, and now settled in
+            the hills where she does the thing she loves most: cooking, quietly, for people
+            who arrive hungry.
+          </p>
+          <p className="mt-4 text-sm text-bone/60 italic">
+            "The best compliment is a clean plate and a silent table."
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Testimonials ───────────────────────────────────────────────────────
+function Testimonials() {
+  return (
+    <section className="py-28 border-t border-bone/10">
+      <div className="mx-auto max-w-7xl px-6">
+        <Overline>Guests, on the record</Overline>
+        <div className="mt-14 grid md:grid-cols-3 gap-12">
+          {REVIEWS.map((r) => (
+            <figure key={r.name}>
+              <blockquote className="font-display text-2xl leading-snug text-bone italic text-balance">
+                “{r.text}”
+              </blockquote>
+              <figcaption className="mt-6 text-[11px] tracking-[0.24em] uppercase text-bone/50">
+                — {r.name} · {r.src}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+        <p className="mt-16 text-xs text-bone/40 italic">
+          Reviews curated from around the web. Manually refreshed.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+// ─── Gallery ────────────────────────────────────────────────────────────
+function Gallery() {
+  const captions = ["The main room, after sundown", "Winter light through the arches", "A quiet fire, always lit"];
+  return (
+    <section id="gallery" className="py-28 border-t border-bone/10">
+      <div className="mx-auto max-w-7xl px-6">
+        <Overline>Inside The Den</Overline>
+        <h2 className="mt-4 font-display text-5xl font-light">Come see for yourself.</h2>
+        <div className="mt-16 grid md:grid-cols-3 gap-4">
+          {GALLERY.map((src, i) => (
+            <figure key={i} className="group relative overflow-hidden">
+              <img src={src} alt={captions[i]} className="w-full h-96 object-cover transition-transform duration-1000 group-hover:scale-105" />
+              <figcaption className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-obsidian to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="text-[11px] tracking-[0.24em] uppercase text-bone">{captions[i]}</span>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Extras: Party booking + reviews already covered ────────────────────
+function Extras() {
+  const [form, setForm] = useState({ name: "", phone: "", date: "", guests: "", occasion: "Birthday" });
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name || !form.phone) return;
+    const msg = `Hi The Den — I'd like to enquire about a private event.
+
+Name: ${form.name}
+Phone: ${form.phone}
+Date: ${form.date}
+Guests: ${form.guests}
+Occasion: ${form.occasion}`;
+    window.open(wa(msg), "_blank");
+  };
+  return (
+    <section id="extras" className="py-28 border-t border-bone/10 bg-card">
+      <div className="mx-auto max-w-7xl px-6 grid lg:grid-cols-12 gap-16">
+        <div className="lg:col-span-5">
+          <Overline>Parties & Private Events</Overline>
+          <h2 className="mt-4 font-display text-5xl font-light leading-tight">
+            The room, <span className="italic text-ember">to yourself.</span>
+          </h2>
+          <p className="mt-6 text-bone/70 leading-relaxed max-w-md">
+            Birthdays, anniversaries, small weddings, and slow work dinners. We host groups
+            of 10 to 60 with a set menu tailored to the occasion.
+          </p>
+          <dl className="mt-10 space-y-4 text-sm">
+            {[
+              ["Capacity", "10 – 60 guests"],
+              ["Occasions", "Birthdays · Anniversaries · Corporate · Small weddings"],
+              ["Confirms in", "Within 4 hours, over WhatsApp or call"],
+            ].map(([k, v]) => (
+              <div key={k} className="grid grid-cols-[110px_1fr] gap-4 border-b border-bone/10 pb-3">
+                <dt className="text-[10px] tracking-[0.28em] uppercase text-bone/50">{k}</dt>
+                <dd className="text-bone/85">{v}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+
+        <form onSubmit={submit} className="lg:col-span-7 space-y-5">
+          <div className="grid sm:grid-cols-2 gap-5">
+            <Field label="Your name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} required />
+            <Field label="Phone" type="tel" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} required />
+            <Field label="Date" type="date" value={form.date} onChange={(v) => setForm({ ...form, date: v })} />
+            <Field label="Guest count" type="number" value={form.guests} onChange={(v) => setForm({ ...form, guests: v })} />
+          </div>
+          <div>
+            <label className="text-[10px] tracking-[0.28em] uppercase text-bone/50">Occasion</label>
+            <select
+              value={form.occasion}
+              onChange={(e) => setForm({ ...form, occasion: e.target.value })}
+              className="mt-2 w-full bg-transparent border-b border-bone/20 py-2 text-bone focus:outline-none focus:border-ember"
+            >
+              {["Birthday", "Anniversary", "Corporate", "Wedding", "Other"].map((o) => (
+                <option key={o} className="bg-obsidian">{o}</option>
+              ))}
+            </select>
+          </div>
+          <div className="pt-4 flex flex-wrap gap-3 items-center">
+            <Btn type="submit"><MessageCircle size={14} /> Enquire via WhatsApp</Btn>
+            <span className="text-xs text-bone/50 italic">We'll confirm within 4 hours.</span>
+          </div>
+        </form>
+      </div>
+    </section>
+  );
+}
+
+function Field({
+  label, value, onChange, type = "text", required = false,
+}: { label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean }) {
+  return (
+    <label className="block">
+      <span className="text-[10px] tracking-[0.28em] uppercase text-bone/50">{label}{required && " *"}</span>
+      <input
+        type={type}
+        required={required}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        maxLength={120}
+        className="mt-2 w-full bg-transparent border-b border-bone/20 py-2 text-bone focus:outline-none focus:border-ember transition-colors"
+      />
+    </label>
+  );
+}
+
+// ─── Reserve ────────────────────────────────────────────────────────────
+function Reserve() {
+  const [form, setForm] = useState({ name: "", phone: "", date: "", time: "19:30", guests: "2" });
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name || !form.phone) return;
+    const msg = `Hi The Den — I'd like to reserve a table.
+
+Name: ${form.name}
+Phone: ${form.phone}
+Date: ${form.date}
+Time: ${form.time}
+Guests: ${form.guests}`;
+    window.open(wa(msg), "_blank");
+  };
+  return (
+    <section id="reserve" className="py-28 border-t border-bone/10">
+      <div className="mx-auto max-w-4xl px-6 text-center">
+        <Overline>Reservations</Overline>
+        <h2 className="mt-4 font-display text-5xl sm:text-6xl font-light leading-tight text-balance">
+          Save a seat<br />
+          <span className="italic text-ember">by the fire.</span>
+        </h2>
+        <form onSubmit={submit} className="mt-14 grid sm:grid-cols-2 gap-6 text-left">
+          <Field label="Name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} required />
+          <Field label="Phone" type="tel" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} required />
+          <Field label="Date" type="date" value={form.date} onChange={(v) => setForm({ ...form, date: v })} />
+          <Field label="Time" type="time" value={form.time} onChange={(v) => setForm({ ...form, time: v })} />
+          <div className="sm:col-span-2">
+            <label className="text-[10px] tracking-[0.28em] uppercase text-bone/50">Guests</label>
+            <select
+              value={form.guests}
+              onChange={(e) => setForm({ ...form, guests: e.target.value })}
+              className="mt-2 w-full bg-transparent border-b border-bone/20 py-2 text-bone focus:outline-none focus:border-ember"
+            >
+              {[1, 2, 3, 4, 5, 6, 7, 8, "9+"].map((g) => (
+                <option key={g} className="bg-obsidian">{g} {g === 1 ? "guest" : "guests"}</option>
+              ))}
+            </select>
+          </div>
+          <div className="sm:col-span-2 pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Btn type="submit"><MessageCircle size={14} /> Send via WhatsApp</Btn>
+            <span className="text-sm text-bone/60">
+              Prefer to call? <a href={`tel:${PHONE}`} className="text-ember hover:text-bone underline underline-offset-4">{PHONE_DISPLAY}</a>
+            </span>
+          </div>
+        </form>
+      </div>
+    </section>
+  );
+}
+
+// ─── Contact ────────────────────────────────────────────────────────────
+function Contact({ isOpen }: { isOpen: boolean }) {
+  return (
+    <section id="contact" className="py-28 border-t border-bone/10 bg-card">
+      <div className="mx-auto max-w-7xl px-6 grid lg:grid-cols-12 gap-12">
+        <div className="lg:col-span-5">
+          <Overline>Visit Us</Overline>
+          <h2 className="mt-4 font-display text-5xl font-light">Come find us.</h2>
+
+          <div className="mt-10 space-y-8">
+            <div className="flex gap-4">
+              <MapPin size={18} className="text-ember mt-1 shrink-0" strokeWidth={1.5} />
+              <div>
+                <div className="text-[10px] tracking-[0.28em] uppercase text-bone/50">Address</div>
+                <div className="mt-1 text-bone">{ADDRESS}</div>
+                <a href={MAPS_URL} target="_blank" rel="noopener" className="mt-2 inline-block text-xs tracking-[0.24em] uppercase text-ember hover:text-bone">
+                  Get directions →
+                </a>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <Phone size={18} className="text-ember mt-1 shrink-0" strokeWidth={1.5} />
+              <div>
+                <div className="text-[10px] tracking-[0.28em] uppercase text-bone/50">Phone & WhatsApp</div>
+                <a href={`tel:${PHONE}`} className="mt-1 block text-bone hover:text-ember">{PHONE_DISPLAY}</a>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <Clock size={18} className="text-ember mt-1 shrink-0" strokeWidth={1.5} />
+              <div>
+                <div className="text-[10px] tracking-[0.28em] uppercase text-bone/50">Hours</div>
+                <div className="mt-1 text-bone">Daily · 8:00 am – 11:00 pm</div>
+                <div className={`mt-1 text-xs ${isOpen ? "text-glass" : "text-bone/50"}`}>
+                  {isOpen ? "Open right now" : "Closed at the moment"}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-12 border border-ember/30 p-6">
+            <div className="text-[10px] tracking-[0.28em] uppercase text-ember">Confirm your booking</div>
+            <div className="mt-3 font-display text-2xl text-bone leading-snug">
+              Call or WhatsApp us directly for immediate confirmation.
+            </div>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Btn href={`tel:${PHONE}`}><Phone size={14} /> Call {PHONE_DISPLAY}</Btn>
+              <Btn href={wa("Hi, I'd like to confirm a booking at The Den.")} variant="outline"><MessageCircle size={14} /> WhatsApp</Btn>
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:col-span-7">
+          <div className="aspect-[4/3] w-full overflow-hidden border border-bone/10">
+            <iframe
+              title="The Den — McLeod Ganj"
+              src="https://www.google.com/maps?q=McLeod+Ganj+Dharamshala&output=embed"
+              className="h-full w-full grayscale contrast-125"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Footer ─────────────────────────────────────────────────────────────
+function Footer() {
+  return (
+    <footer className="border-t border-bone/10 py-16">
+      <div className="mx-auto max-w-7xl px-6 grid md:grid-cols-4 gap-10">
+        <div className="md:col-span-2">
+          <div className="font-display text-3xl text-bone">The Den</div>
+          <p className="mt-3 text-sm text-bone/60 italic max-w-xs">
+            A candlelit table in the mountains. McLeod Ganj, since 2015.
+          </p>
+        </div>
+        <div>
+          <div className="text-[10px] tracking-[0.28em] uppercase text-bone/50 mb-4">Visit</div>
+          <div className="text-sm text-bone/75 space-y-2">
+            <div>{ADDRESS}</div>
+            <div>Daily · 8am – 11pm</div>
+          </div>
+        </div>
+        <div>
+          <div className="text-[10px] tracking-[0.28em] uppercase text-bone/50 mb-4">Contact</div>
+          <div className="text-sm space-y-2">
+            <a href={`tel:${PHONE}`} className="block text-bone hover:text-ember">{PHONE_DISPLAY}</a>
+            <a href={wa("Hello The Den!")} target="_blank" rel="noopener" className="block text-bone hover:text-ember">WhatsApp us</a>
+            <a href={MAPS_URL} target="_blank" rel="noopener" className="block text-bone hover:text-ember">Get directions</a>
+          </div>
+        </div>
+      </div>
+      <div className="mx-auto max-w-7xl px-6 mt-12 pt-8 border-t border-bone/10 flex flex-wrap justify-between gap-4 text-xs text-bone/40">
+        <span>© {new Date().getFullYear()} The Den, McLeod Ganj. All rights reserved.</span>
+        <span className="italic">Built with candlelight.</span>
+      </div>
+    </footer>
+  );
+}
+
+// ─── Mobile sticky call bar ─────────────────────────────────────────────
+function MobileCallBar() {
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-40 lg:hidden bg-obsidian/95 backdrop-blur border-t border-bone/10 grid grid-cols-2">
+      <a href={`tel:${PHONE}`} className="flex items-center justify-center gap-2 py-4 text-xs tracking-[0.2em] uppercase text-bone">
+        <Phone size={14} /> Call
+      </a>
+      <a href={wa("Hello The Den!")} target="_blank" rel="noopener" className="flex items-center justify-center gap-2 py-4 text-xs tracking-[0.2em] uppercase text-obsidian bg-ember">
+        <MessageCircle size={14} /> WhatsApp
+      </a>
     </div>
   );
 }
