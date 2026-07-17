@@ -83,19 +83,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "The Den is a candlelit multi-cuisine restaurant in McLeod Ganj serving Indian, Chinese and Continental favourites. Reserve a table or call +91 85870 44000.",
       },
-      { property: "og:title", content: "The Den — McLeod Ganj" },
+      { property: "og:title", content: "The Den — McLeod Ganj | Multi-cuisine Restaurant" },
       {
         property: "og:description",
         content:
-          "A candlelit table in the mountains. Indian, Chinese & Continental in the heart of McLeod Ganj.",
+          "The Den is a candlelit multi-cuisine restaurant in McLeod Ganj serving Indian, Chinese and Continental favourites. Reserve a table or call +91 85870 44000.",
       },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "The Den" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "The Den — McLeod Ganj | Multi-cuisine Restaurant" },
+      { name: "twitter:description", content: "The Den is a candlelit multi-cuisine restaurant in McLeod Ganj serving Indian, Chinese and Continental favourites. Reserve a table or call +91 85870 44000." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/03e87ad0-028f-4272-9bf3-6444e80d78eb/id-preview-04ca1bcf--471ed728-3b46-4361-80af-56962abec572.lovable.app-1784294362780.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/03e87ad0-028f-4272-9bf3-6444e80d78eb/id-preview-04ca1bcf--471ed728-3b46-4361-80af-56962abec572.lovable.app-1784294362780.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
