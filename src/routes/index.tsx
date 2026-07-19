@@ -16,6 +16,10 @@ import {
   Utensils,
   Wine,
   Sparkles,
+  Soup,
+  Drumstick,
+  Fish,
+  GlassWater,
 } from "lucide-react";
 import ambienceHero from "@/assets/ambience-hero.png";
 import ambience2 from "@/assets/ambience-2.png";
@@ -32,6 +36,87 @@ export const Route = createFileRoute("/")({
 });
 
 const PHONE = "8587044000";
+
+// ─── Custom Food Outline Icons ──────────────────────────────────────────
+const TomatoIcon = ({ size = 16, className = "" }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <circle cx="12" cy="13" r="8" />
+    <path d="M12 5c-0.8-1.5-2.2-1.5-2.2-1.5s0.8 2.2 0.8 3" />
+    <path d="M12 5c0.8-1.5 2.2-1.5 2.2-1.5s-0.8 2.2-0.8 3" />
+    <path d="M12 2v3" />
+  </svg>
+);
+
+const RollIcon = ({ size = 16, className = "" }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <rect x="3" y="8" width="18" height="8" rx="2" transform="rotate(-15 12 12)" />
+    <path d="M6 10l3 3m3-3l3 3m3-3l3 3" />
+  </svg>
+);
+
+const SkewerIcon = ({ size = 16, className = "" }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <line x1="2" y1="22" x2="22" y2="2" />
+    <rect x="7" y="11" width="4" height="4" rx="1" transform="rotate(45 9 13)" />
+    <rect x="12" y="6" width="4" height="4" rx="1" transform="rotate(45 14 8)" />
+    <rect x="17" y="1" width="4" height="4" rx="1" transform="rotate(45 19 3)" />
+  </svg>
+);
+
+const RiceIcon = ({ size = 16, className = "" }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M2 12h20A10 10 0 0 1 12 22 10 10 0 0 1 2 12z" />
+    <path d="M12 2v6" />
+    <path d="M8 3v4" />
+    <path d="M16 3v4" />
+  </svg>
+);
+
+const NoodleIcon = ({ size = 16, className = "" }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M2 12h20A10 10 0 0 1 12 22 10 10 0 0 1 2 12z" />
+    <path d="M6 12c1-3 3-5 6-5s5 2 6 5" />
+    <path d="M19 5l-7 14" />
+    <path d="M21 7L14 21" />
+  </svg>
+);
+
+const BreadIcon = ({ size = 16, className = "" }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M3 12c0-3.9 3.1-7 7-7h4c3.9 0 7 3.1 7 7v4c0 1.7-1.3 3-3 3H6c-1.7 0-3-1.3-3-3v-4z" />
+    <path d="M7 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" />
+    <path d="M12 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" />
+    <path d="M17 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" />
+  </svg>
+);
+
+function getMenuItemIcon(name: string, category: string): React.ComponentType<{ size?: number; className?: string }> | null {
+  const lowercase = name.toLowerCase();
+  
+  if (lowercase.includes("tomato")) return TomatoIcon;
+  if (lowercase.includes("spring roll")) return RollIcon;
+  if (lowercase.includes("paneer") || lowercase.includes("dal") || lowercase.includes("veg") || lowercase.includes("jeera") || lowercase.includes("kofta") || lowercase.includes("aloo") || lowercase.includes("kebab")) return Leaf;
+  if (lowercase.includes("chicken") || lowercase.includes("mutton") || lowercase.includes("lamb")) return Drumstick;
+  if (lowercase.includes("fish")) return Fish;
+  if (lowercase.includes("rice") || lowercase.includes("biryani") || lowercase.includes("pulao")) return RiceIcon;
+  if (lowercase.includes("roti") || lowercase.includes("naan") || lowercase.includes("paratha")) return BreadIcon;
+  if (lowercase.includes("noodle") || lowercase.includes("fried rice")) return NoodleIcon;
+  if (lowercase.includes("coffee") || lowercase.includes("lime") || lowercase.includes("soda") || lowercase.includes("bev")) return GlassWater;
+  if (lowercase.includes("jamun") || lowercase.includes("brownie") || lowercase.includes("cream")) return Sparkles;
+  
+  return null;
+}
+
+const CATEGORY_ICONS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+  "Starters": SkewerIcon,
+  "Soups": Soup,
+  "Vegetarian Mains": Leaf,
+  "Non-Vegetarian Mains": Drumstick,
+  "Rice & Biryani": RiceIcon,
+  "Breads": BreadIcon,
+  "Chinese": NoodleIcon,
+  "Desserts & Beverages": GlassWater,
+};
 const PHONE_DISPLAY = "+91 85870 44000";
 const WA = "918587044000";
 const MAPS_URL = "https://maps.app.goo.gl/NzuvBuMyLjCGQ7UT8";
@@ -479,7 +564,13 @@ function Signature() {
               style={{ transformOrigin: "center bottom" }}
             >
               <div className="flex items-baseline justify-between gap-4 border-b border-bone/15 pb-3 transition-shadow duration-300 group-hover:shadow-[0_4px_20px_rgba(192,128,80,0.08)]">
-                <h3 className="font-display text-2xl text-bone group-hover:text-ember transition-colors">{d.name}</h3>
+                <div className="flex items-center gap-3">
+                  {(() => {
+                    const ItemIcon = getMenuItemIcon(d.name, "");
+                    return ItemIcon && <ItemIcon size={20} strokeWidth={1.5} className="text-ember/70 group-hover:text-ember transition-colors shrink-0" />;
+                  })()}
+                  <h3 className="font-display text-2xl text-bone group-hover:text-ember transition-colors">{d.name}</h3>
+                </div>
                 <span className="font-display text-xl text-ember whitespace-nowrap transition-transform duration-300 group-hover:translate-x-1">{"\u20B9"}{d.price}</span>
               </div>
               <div className="mt-3 flex items-center gap-3 text-[10px] tracking-[0.24em] uppercase text-bone/50">
@@ -593,20 +684,24 @@ function FullMenu() {
             <h2 className="mt-4 font-display text-5xl sm:text-6xl font-light leading-tight">
               Read it like<br /><span className="italic text-ember">a good letter.</span>
             </h2>
-            <nav className="mt-10 flex flex-col gap-1">
-              {MENU.map((s) => (
-                <button
-                  key={s.category}
-                  onClick={() => setActive(s.category)}
-                  className={`text-left py-2 pl-4 border-l text-sm tracking-wide transition-all ${
-                    active === s.category
-                      ? "border-ember text-ember"
-                      : "border-bone/10 text-bone/60 hover:text-bone hover:border-bone/40"
-                  }`}
-                >
-                  {s.category}
-                </button>
-              ))}
+            <nav className="mt-10 flex flex-col gap-2">
+              {MENU.map((s) => {
+                const IconComponent = CATEGORY_ICONS[s.category] || Utensils;
+                return (
+                  <button
+                    key={s.category}
+                    onClick={() => setActive(s.category)}
+                    className={`flex items-center gap-3 text-left py-2.5 pl-4 border-l text-sm tracking-wide transition-all ${
+                      active === s.category
+                        ? "border-ember text-ember bg-ember/5"
+                        : "border-bone/10 text-bone/60 hover:text-bone hover:border-bone/40 hover:bg-bone/5"
+                    }`}
+                  >
+                    <IconComponent size={16} strokeWidth={1.5} className="shrink-0" />
+                    <span>{s.category}</span>
+                  </button>
+                );
+              })}
             </nav>
             <a
               href="/menu.pdf"
@@ -621,13 +716,19 @@ function FullMenu() {
             <div className="border-t border-bone/10 pt-8">
               <h3 className="font-display text-3xl text-bone mb-8">{current.category}</h3>
               <ul className="divide-y divide-bone/10">
-                {current.items.map((d) => (
-                  <li key={d.name} className="py-5 flex items-baseline gap-6">
-                    <span className="font-display text-lg text-bone flex-1">{d.name}</span>
-                    <span className="hidden sm:block flex-1 border-b border-dotted border-bone/20 mb-2" />
-                    <span className="font-display text-lg text-ember whitespace-nowrap">{"\u20B9"}{d.price}</span>
-                  </li>
-                ))}
+                {current.items.map((d) => {
+                  const ItemIcon = getMenuItemIcon(d.name, current.category);
+                  return (
+                    <li key={d.name} className="py-5 flex items-baseline gap-6 group">
+                      <div className="flex items-center gap-3 flex-1">
+                        {ItemIcon && <ItemIcon size={16} strokeWidth={1.5} className="text-ember/70 shrink-0 group-hover:text-ember transition-colors" />}
+                        <span className="font-display text-lg text-bone group-hover:text-ember transition-colors">{d.name}</span>
+                      </div>
+                      <span className="hidden sm:block flex-1 border-b border-dotted border-bone/20 mb-2" />
+                      <span className="font-display text-lg text-ember whitespace-nowrap">{"\u20B9"}{d.price}</span>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           </div>
