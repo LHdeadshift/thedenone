@@ -304,24 +304,20 @@ function Header({ isOpen }: { isOpen: boolean }) {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
+      className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 py-4 ${
         scrolled
-          ? "bg-obsidian/90 backdrop-blur-md py-2"
-          : "bg-transparent py-5"
+          ? "bg-obsidian/90 backdrop-blur-md"
+          : "bg-transparent"
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6">
-        <a href="#home" className="flex items-baseline gap-2 transition-all duration-500">
-          <span
-            className={`font-display font-light tracking-wide text-bone transition-all duration-500 ${
-              scrolled ? "text-xl" : "text-2xl"
-            }`}
-          >
+        <a href="#home" className="flex items-baseline gap-2">
+          <span className="font-display font-light tracking-wide text-bone text-2xl">
             The Den
           </span>
-          <span className={`hidden sm:inline text-[10px] tracking-[0.3em] uppercase text-ember transition-opacity duration-500 ${
-            scrolled ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
-          }`}>Est. 2015</span>
+          <span className="hidden sm:inline text-[10px] tracking-[0.3em] uppercase text-ember">
+            Est. 2015
+          </span>
         </a>
         <nav className="hidden lg:flex items-center gap-8">
           {nav.map(([label, href]) => (
