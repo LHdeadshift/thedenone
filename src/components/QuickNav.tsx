@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 
 const SECTIONS = [
@@ -11,51 +11,29 @@ const SECTIONS = [
   { label: "Contact", id: "contact" },
 ];
 
+interface QuickNavProps {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  activeSection: string;
+}
+
 /**
- * Fixed corner quick-nav: dot-grid icon → slide-out panel.
- * IO-tracked current section, focus-trapped, Esc-dismissible.
+ * Slide-out navigation panel.
+ * Focus-trapped, Esc-dismissible, highlights active section in bold & bigger font.
  */
-export function QuickNav() {
-  const [open, setOpen] = useState(false);
-  const [active, setActive] = useState("home");
+export function QuickNav({ open, setOpen, activeSection }: QuickNavProps) {
   const panelRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
 
-  // Track active section via IntersectionObserver
-  useEffect(() => {
-    const observers: IntersectionObserver[] = [];
-
-    SECTIONS.forEach(({ id }) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-
-      const io = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            setActive(id);
-          }
-        },
-        { threshold: 0.3, rootMargin: "-80px 0px -40% 0px" },
-      );
-      io.observe(el);
-      observers.push(io);
-    });
-
-    return () => observers.forEach((io) => io.disconnect());
-  }, []);
-
-  // Keyboard: Esc to close
+  // Keyboard: Esc to close & focus trap
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setOpen(false);
-        triggerRef.current?.focus();
       }
-      // Focus trap
       if (e.key === "Tab" && panelRef.current) {
         const focusable = panelRef.current.querySelectorAll<HTMLElement>(
-          'a, button, [tabindex]:not([tabindex="-1"])',
+          'a, button, [tabindex]:not([-1])',
         );
         const first = focusable[0];
         const last = focusable[focusable.length - 1];
@@ -70,40 +48,22 @@ export function QuickNav() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, setOpen]);
 
   // Focus panel on open
   useEffect(() => {
     if (open && panelRef.current) {
-      const firstLink =
-        panelRef.current.querySelector<HTMLElement>("a, button");
+      const firstLink = panelRef.current.querySelector<HTMLElement>("a, button");
       firstLink?.focus();
     }
   }, [open]);
 
   return (
     <>
-      {/* Trigger button — dot-grid icon */}
-      <button
-        ref={triggerRef}
-        onClick={() => setOpen(true)}
-        aria-label="Open quick navigation"
-        className="fixed top-5 right-5 z-[60] flex flex-col gap-[3px] p-3 group"
-      >
-        <div className="flex gap-[3px]">
-          <span className="block h-[3px] w-[3px] rounded-full bg-bone/70 group-hover:bg-ember transition-colors" />
-          <span className="block h-[3px] w-[3px] rounded-full bg-bone/70 group-hover:bg-ember transition-colors" />
-        </div>
-        <div className="flex gap-[3px]">
-          <span className="block h-[3px] w-[3px] rounded-full bg-bone/70 group-hover:bg-ember transition-colors" />
-          <span className="block h-[3px] w-[3px] rounded-full bg-bone/70 group-hover:bg-ember transition-colors" />
-        </div>
-      </button>
-
       {/* Backdrop */}
       {open && (
         <div
-          className="fixed inset-0 z-[70] bg-obsidian/40 backdrop-blur-sm"
+          className="fixed inset-0 z-[70] bg-obsidian/60 backdrop-blur-sm transition-opacity"
           onClick={() => setOpen(false)}
           aria-hidden="true"
         />
@@ -120,41 +80,42 @@ export function QuickNav() {
         }`}
       >
         <div className="flex items-center justify-between px-8 pt-8 pb-4">
-          <span className="text-[10px] tracking-[0.32em] uppercase text-bone/50">
-            Navigate
+          <span className="text-[10px] tracking-[0.32em] uppercase text-bone/50 font-medium">
+            Navigation
           </span>
           <button
-            onClick={() => {
-              setOpen(false);
-              triggerRef.current?.focus();
-            }}
+            onClick={() => setOpen(false)}
             aria-label="Close navigation"
             className="p-2 text-bone/60 hover:text-ember transition-colors"
           >
-            <X size={18} strokeWidth={1.5} />
+            <X size={20} strokeWidth={1.5} />
           </button>
         </div>
 
-        <nav className="flex-1 flex flex-col justify-center px-8 gap-1">
-          {SECTIONS.map(({ label, id }) => (
-            <a
-              key={id}
-              href={`#${id}`}
-              onClick={() => setOpen(false)}
-              className={`block py-3 text-lg tracking-wide transition-all ${
-                active === id
-                  ? "text-bone font-semibold underline underline-offset-8 decoration-ember"
-                  : "text-bone/50 hover:text-bone"
-              }`}
-            >
-              {label}
-            </a>
-          ))}
+        <nav className="flex-1 flex flex-col justify-center px-8 gap-2">
+          {SECTIONS.map(({ label, id }) => {
+            const isActive = activeSection === id;
+            return (
+              <a
+                key={id}
+                href={`#${id}`}
+                onClick={() => setOpen(false)}
+                className={`flex items-center justify-between py-2.5 tracking-wide transition-all ${
+                  isActive
+                    ? "text-ember font-bold text-xl tracking-wider pl-2 border-l-2 border-ember bg-ember/5"
+                    : "text-bone/60 hover:text-bone font-normal text-base hover:pl-1"
+                }`}
+              >
+                <span>{label}</span>
+                {isActive && <span className="h-2 w-2 rounded-full bg-ember animate-pulse" />}
+              </a>
+            );
+          })}
         </nav>
 
         <div className="px-8 pb-8">
           <div className="border-t border-bone/10 pt-6">
-            <span className="font-display text-xl text-bone/60">The Den</span>
+            <span className="font-display text-lg text-bone/70 font-medium">The Den</span>
             <p className="mt-1 text-[10px] tracking-[0.24em] uppercase text-bone/40">
               McLeod Ganj · Est. 2015
             </p>

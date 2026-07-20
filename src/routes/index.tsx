@@ -30,15 +30,14 @@ import { Loader3D } from "@/components/Loader3D";
 import { QuickNav } from "@/components/QuickNav";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useCountUp } from "@/hooks/useCountUp";
-
-export const Route = createFileRoute("/")({
-  component: Index,
-});
+import { useActiveSection } from "@/hooks/useActiveSection";
 
 const PHONE = "8587044000";
 
 // ─── Custom Food Outline Icons ──────────────────────────────────────────
-const TomatoIcon = ({ size = 16, className = "" }: { size?: number; className?: string }) => (
+type IconProps = { size?: number; className?: string; strokeWidth?: number };
+
+const TomatoIcon = ({ size = 16, className = "" }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}>
     <circle cx="12" cy="13" r="8" />
     <path d="M12 5c-0.8-1.5-2.2-1.5-2.2-1.5s0.8 2.2 0.8 3" />
@@ -47,14 +46,14 @@ const TomatoIcon = ({ size = 16, className = "" }: { size?: number; className?: 
   </svg>
 );
 
-const RollIcon = ({ size = 16, className = "" }: { size?: number; className?: string }) => (
+const RollIcon = ({ size = 16, className = "" }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}>
     <rect x="3" y="8" width="18" height="8" rx="2" transform="rotate(-15 12 12)" />
     <path d="M6 10l3 3m3-3l3 3m3-3l3 3" />
   </svg>
 );
 
-const SkewerIcon = ({ size = 16, className = "" }: { size?: number; className?: string }) => (
+const SkewerIcon = ({ size = 16, className = "" }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}>
     <line x1="2" y1="22" x2="22" y2="2" />
     <rect x="7" y="11" width="4" height="4" rx="1" transform="rotate(45 9 13)" />
@@ -63,7 +62,7 @@ const SkewerIcon = ({ size = 16, className = "" }: { size?: number; className?: 
   </svg>
 );
 
-const RiceIcon = ({ size = 16, className = "" }: { size?: number; className?: string }) => (
+const RiceIcon = ({ size = 16, className = "" }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M2 12h20A10 10 0 0 1 12 22 10 10 0 0 1 2 12z" />
     <path d="M12 2v6" />
@@ -72,7 +71,7 @@ const RiceIcon = ({ size = 16, className = "" }: { size?: number; className?: st
   </svg>
 );
 
-const NoodleIcon = ({ size = 16, className = "" }: { size?: number; className?: string }) => (
+const NoodleIcon = ({ size = 16, className = "" }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M2 12h20A10 10 0 0 1 12 22 10 10 0 0 1 2 12z" />
     <path d="M6 12c1-3 3-5 6-5s5 2 6 5" />
@@ -81,7 +80,7 @@ const NoodleIcon = ({ size = 16, className = "" }: { size?: number; className?: 
   </svg>
 );
 
-const BreadIcon = ({ size = 16, className = "" }: { size?: number; className?: string }) => (
+const BreadIcon = ({ size = 16, className = "" }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M3 12c0-3.9 3.1-7 7-7h4c3.9 0 7 3.1 7 7v4c0 1.7-1.3 3-3 3H6c-1.7 0-3-1.3-3-3v-4z" />
     <path d="M7 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" />
@@ -90,7 +89,7 @@ const BreadIcon = ({ size = 16, className = "" }: { size?: number; className?: s
   </svg>
 );
 
-function getMenuItemIcon(name: string, category: string): React.ComponentType<{ size?: number; className?: string }> | null {
+function getMenuItemIcon(name: string, category: string): React.ComponentType<IconProps> | null {
   const lowercase = name.toLowerCase();
   
   if (lowercase.includes("tomato")) return TomatoIcon;
@@ -107,7 +106,7 @@ function getMenuItemIcon(name: string, category: string): React.ComponentType<{ 
   return null;
 }
 
-const CATEGORY_ICONS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+const CATEGORY_ICONS: Record<string, React.ComponentType<IconProps>> = {
   "Starters": SkewerIcon,
   "Soups": Soup,
   "Vegetarian Mains": Leaf,
@@ -263,26 +262,25 @@ function pickOfTheDay() {
   return PICK_ROTATION[day % PICK_ROTATION.length];
 }
 
-// ─── UI primitives ──────────────────────────────────────────────────────
+// ─── Reusable UI ────────────────────────────────────────────────────────
 function Btn({
   children,
-  href,
   variant = "primary",
-  className = "",
+  href,
   onClick,
   type,
+  className = "",
 }: {
   children: React.ReactNode;
-  href?: string;
   variant?: "primary" | "ghost" | "outline";
-  className?: string;
+  href?: string;
   onClick?: () => void;
   type?: "button" | "submit";
+  className?: string;
 }) {
-  const base =
-    "inline-flex items-center justify-center gap-2 px-6 py-3 text-[13px] tracking-[0.18em] uppercase transition-all duration-300";
+  const base = "inline-flex items-center justify-center gap-2 px-6 py-3 text-xs tracking-[0.2em] uppercase font-medium transition-all duration-300";
   const styles = {
-    primary: "bg-ember text-obsidian hover:bg-bone",
+    primary: "bg-ember text-obsidian hover:bg-bone shadow-md hover:shadow-ember/20",
     ghost: "text-bone hover:text-ember",
     outline: "border border-bone/30 text-bone hover:border-ember hover:text-ember",
   }[variant];
@@ -293,8 +291,7 @@ function Btn({
 
 function Overline({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-3 text-[11px] tracking-[0.32em] uppercase text-ember">
-      <span className="h-px w-8 bg-ember/60" />
+    <div className="text-[11px] tracking-[0.3em] uppercase text-ember font-semibold">
       <span>{children}</span>
     </div>
   );
@@ -304,6 +301,8 @@ function Overline({ children }: { children: React.ReactNode }) {
 function Index() {
   const isOpen = useOpenStatus();
   const pick = useMemo(pickOfTheDay, []);
+  const activeSection = useActiveSection();
+  const [navOpen, setNavOpen] = useState(false);
   const [loaderDone, setLoaderDone] = useState(() => {
     if (typeof window !== "undefined") {
       return sessionStorage.getItem("den-loaded") === "1";
@@ -346,8 +345,8 @@ function Index() {
     <>
       {!loaderDone && <Loader3D onDone={handleLoaderDone} />}
       <div className="min-h-screen bg-background text-foreground">
-        <Header isOpen={isOpen} />
-        <QuickNav />
+        <Header isOpen={isOpen} activeSection={activeSection} onOpenNav={() => setNavOpen(true)} />
+        <QuickNav open={navOpen} setOpen={setNavOpen} activeSection={activeSection} />
         <Hero isOpen={isOpen} />
         <About />
         <Signature />
@@ -368,7 +367,15 @@ function Index() {
 }
 
 // ─── Header ─────────────────────────────────────────────────────────────
-function Header({ isOpen }: { isOpen: boolean }) {
+function Header({
+  isOpen,
+  activeSection,
+  onOpenNav,
+}: {
+  isOpen: boolean;
+  activeSection: string;
+  onOpenNav: () => void;
+}) {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -378,54 +385,92 @@ function Header({ isOpen }: { isOpen: boolean }) {
   }, []);
 
   const nav = [
-    ["Home", "#home"],
-    ["About", "#about"],
-    ["Menu", "#menu"],
-    ["Gallery", "#gallery"],
-    ["Reserve", "#reserve"],
-    ["Extras", "#extras"],
-    ["Contact", "#contact"],
+    ["Home", "#home", "home"],
+    ["About", "#about", "about"],
+    ["Menu", "#menu", "menu"],
+    ["Gallery", "#gallery", "gallery"],
+    ["Reserve", "#reserve", "reserve"],
+    ["Extras", "#extras", "extras"],
+    ["Contact", "#contact", "contact"],
   ];
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 py-4 ${
+      className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 py-3.5 ${
         scrolled
-          ? "bg-obsidian/90 backdrop-blur-md"
-          : "bg-transparent"
+          ? "bg-obsidian/90 backdrop-blur-md border-b border-bone/10 shadow-lg"
+          : "bg-obsidian/40 backdrop-blur-xs"
       }`}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6">
-        <a href="#home" className="flex items-baseline gap-2">
-          <span className="font-display font-light tracking-wide text-bone text-2xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6">
+        <a href="#home" className="flex items-baseline gap-2 group">
+          <span className="font-display font-medium tracking-wide text-bone text-xl sm:text-2xl group-hover:text-ember transition-colors">
             The Den
           </span>
-          <span className="hidden sm:inline text-[10px] tracking-[0.3em] uppercase text-ember">
-            Est. 2015
+          <span className="hidden sm:inline text-[9px] tracking-[0.28em] uppercase text-ember/80 font-medium">
+            McLeod Ganj
           </span>
         </a>
-        <nav className="hidden lg:flex items-center gap-8">
-          {nav.map(([label, href]) => (
-            <a
-              key={href}
-              href={href}
-              className="text-[11px] tracking-[0.28em] uppercase text-bone/70 hover:text-ember transition-colors"
-            >
-              {label}
-            </a>
-          ))}
+
+        {/* Desktop Navbar with Section Highlighting & Bold + Bigger Font for Active Section */}
+        <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
+          {nav.map(([label, href, id]) => {
+            const isActive = activeSection === id;
+            return (
+              <a
+                key={href}
+                href={href}
+                className={`relative py-1 transition-all duration-300 tracking-[0.24em] uppercase ${
+                  isActive
+                    ? "text-ember font-bold text-xs sm:text-sm drop-shadow-[0_0_8px_rgba(238,154,84,0.4)] scale-105"
+                    : "text-bone/70 hover:text-bone text-[11px] font-normal"
+                }`}
+              >
+                {label}
+                {isActive && (
+                  <span className="absolute -bottom-1 left-0 right-0 h-[2px] bg-ember rounded-full shadow-[0_0_8px_#ee9a54]" />
+                )}
+              </a>
+            );
+          })}
         </nav>
-        <div className="flex items-center gap-2">
-          <span className={`hidden md:flex items-center gap-2 text-[10px] tracking-[0.24em] uppercase ${isOpen ? "text-glass" : "text-bone/50"}`}>
+
+        {/* Top Actions: Phone, WhatsApp, and Browse Toggle - Spaced Cleanly on Mobile! */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          <span className={`hidden md:flex items-center gap-1.5 text-[10px] tracking-[0.24em] uppercase ${isOpen ? "text-glass font-medium" : "text-bone/50"}`}>
             <span className={`h-1.5 w-1.5 rounded-full ${isOpen ? "bg-glass animate-pulse" : "bg-bone/40"}`} />
             {isOpen ? "Open" : "Closed"}
           </span>
-          <a href={`tel:${PHONE}`} aria-label="Call" className="p-2.5 text-bone hover:text-ember transition-colors">
+          <a
+            href={`tel:${PHONE}`}
+            aria-label="Call The Den"
+            className="p-2 text-bone/80 hover:text-ember transition-colors rounded-full hover:bg-bone/5"
+          >
             <Phone size={18} strokeWidth={1.5} />
           </a>
-          <a href={wa("Hello! I'd like to make an enquiry with The Den.")} target="_blank" rel="noopener" aria-label="WhatsApp" className="p-2.5 text-bone hover:text-ember transition-colors">
+          <a
+            href={wa("Hello! I'd like to make an enquiry with The Den.")}
+            target="_blank"
+            rel="noopener"
+            aria-label="WhatsApp The Den"
+            className="p-2 text-bone/80 hover:text-ember transition-colors rounded-full hover:bg-bone/5"
+          >
             <MessageCircle size={18} strokeWidth={1.5} />
           </a>
+          <button
+            onClick={onOpenNav}
+            aria-label="Open navigation menu"
+            className="p-2 text-bone/80 hover:text-ember transition-colors flex flex-col gap-[3px] ml-1 rounded-full hover:bg-bone/5 group"
+          >
+            <div className="flex gap-[3px]">
+              <span className="block h-[3px] w-[3px] rounded-full bg-bone/90 group-hover:bg-ember transition-colors" />
+              <span className="block h-[3px] w-[3px] rounded-full bg-bone/90 group-hover:bg-ember transition-colors" />
+            </div>
+            <div className="flex gap-[3px]">
+              <span className="block h-[3px] w-[3px] rounded-full bg-bone/90 group-hover:bg-ember transition-colors" />
+              <span className="block h-[3px] w-[3px] rounded-full bg-bone/90 group-hover:bg-ember transition-colors" />
+            </div>
+          </button>
         </div>
       </div>
     </header>
@@ -446,15 +491,11 @@ function Hero({ isOpen }: { isOpen: boolean }) {
       <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-20 pt-32 sm:pb-28">
         <div className="max-w-3xl fade-up">
           <Overline>McLeod Ganj · Est. 2015</Overline>
-          <h1 className="mt-6 font-display text-6xl sm:text-7xl md:text-8xl font-light leading-[0.95] text-bone text-balance">
+          <h1 className="mt-4 font-display text-4xl sm:text-5xl md:text-6xl font-medium leading-[1.08] text-bone text-balance">
             A candlelit table<br />
-            <span className="italic text-ember">in the mountains.</span>
+            <span className="text-ember">in the mountains.</span>
           </h1>
-          <p className="mt-6 max-w-xl text-lg text-bone/80 leading-relaxed">
-            Slow food from the north, wok-tossed classics from the east, and a room that lingers
-            long after the plates are cleared.
-          </p>
-          <p className="mt-3 text-sm text-bone/60 italic">
+          <p className="mt-4 text-sm sm:text-base text-bone/75 tracking-wide font-medium">
             Indian · Chinese · Continental — served nightly, by the fire.
           </p>
           <div className="mt-10 flex flex-wrap gap-3">
@@ -514,23 +555,21 @@ function About() {
         </div>
         <div className="lg:col-span-7 lg:pt-12">
           <div className="reveal"><Overline>Our Story</Overline></div>
-          <h2 className="reveal mt-6 font-display text-5xl sm:text-6xl font-light leading-tight text-balance">
-            Ten winters of woodsmoke,<br />
-            <span className="italic text-ember">and one long menu.</span>
+          <h2 className="reveal mt-4 font-display text-3xl sm:text-4xl md:text-5xl font-medium leading-tight text-balance">
+            Ten years of cooking in McLeod Ganj.
           </h2>
-          <div className="reveal mt-8 space-y-5 text-lg text-bone/75 leading-relaxed max-w-xl">
+          <div className="reveal mt-6 space-y-4 text-base text-bone/75 leading-relaxed max-w-xl">
             <p>
-              The Den opened its doors in 2015 as a small kitchen with a large ambition:
-              to feed McLeod Ganj the food it actually wanted at the end of a long day
-              on the mountain.
+              The Den opened its doors in 2015 as a warm kitchen with a simple goal:
+              to serve authentic, comforting food to locals and travellers returning
+              from the mountains.
             </p>
             <p>
-              A decade later, our copper pots and tandoor are still the loudest thing in
-              the room — everything else is candlelight, low music, and the quiet company
-              of people you'd like to eat again with tomorrow.
+              A decade later, our commitment remains unchanged — quality ingredients,
+              welcoming ambience, and good food served by the fire.
             </p>
           </div>
-          <div className="reveal mt-14 grid grid-cols-2 sm:grid-cols-4 gap-8 border-t border-bone/10 pt-10">
+          <div className="reveal mt-10 grid grid-cols-2 sm:grid-cols-4 gap-8 border-t border-bone/10 pt-8">
             <StatCounter target={820} suffix="+" label="Reviews" />
             <StatCounter target={4.7} decimals={1} label="Rating" />
             <StatCounter target={10} label="Years" />
@@ -545,38 +584,37 @@ function About() {
 // ─── Signature dishes ───────────────────────────────────────────────────
 function Signature() {
   return (
-    <section className="py-28 border-t border-bone/10">
+    <section className="py-24 border-t border-bone/10">
       <div className="mx-auto max-w-7xl px-6">
         <div className="reveal flex flex-wrap items-end justify-between gap-6">
           <div>
-            <Overline>The Kitchen's Favourites</Overline>
-            <h2 className="mt-4 font-display text-5xl font-light">Signature dishes.</h2>
+            <Overline>Kitchen Favourites</Overline>
+            <h2 className="mt-3 font-display text-3xl sm:text-4xl font-medium">Signature Dishes</h2>
           </div>
-          <a href="#menu" className="text-[11px] tracking-[0.28em] uppercase text-ember hover:text-bone transition-colors inline-flex items-center gap-2">
+          <a href="#menu" className="text-[11px] tracking-[0.28em] uppercase text-ember hover:text-bone transition-colors inline-flex items-center gap-2 font-medium">
             Full menu <ChevronRight size={14} />
           </a>
         </div>
-        <div className="mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-14">
+        <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
           {SIGNATURE.map((d, i) => (
             <article
               key={d.name}
-              className={`reveal stagger-${i + 1} group cursor-default transition-all duration-300 hover:scale-[1.03]`}
-              style={{ transformOrigin: "center bottom" }}
+              className={`reveal stagger-${i + 1} group cursor-default transition-all duration-300 hover:scale-[1.02]`}
             >
-              <div className="flex items-baseline justify-between gap-4 border-b border-bone/15 pb-3 transition-shadow duration-300 group-hover:shadow-[0_4px_20px_rgba(192,128,80,0.08)]">
+              <div className="flex items-baseline justify-between gap-4 border-b border-bone/15 pb-3">
                 <div className="flex items-center gap-3">
                   {(() => {
                     const ItemIcon = getMenuItemIcon(d.name, "");
-                    return ItemIcon && <ItemIcon size={20} strokeWidth={1.5} className="text-ember/70 group-hover:text-ember transition-colors shrink-0" />;
+                    return ItemIcon && <ItemIcon size={18} strokeWidth={1.5} className="text-ember/80 group-hover:text-ember transition-colors shrink-0" />;
                   })()}
-                  <h3 className="font-display text-2xl text-bone group-hover:text-ember transition-colors">{d.name}</h3>
+                  <h3 className="font-display text-xl text-bone group-hover:text-ember transition-colors font-medium">{d.name}</h3>
                 </div>
-                <span className="font-display text-xl text-ember whitespace-nowrap transition-transform duration-300 group-hover:translate-x-1">{"\u20B9"}{d.price}</span>
+                <span className="font-display text-lg text-ember whitespace-nowrap font-medium">{"\u20B9"}{d.price}</span>
               </div>
-              <div className="mt-3 flex items-center gap-3 text-[10px] tracking-[0.24em] uppercase text-bone/50">
+              <div className="mt-2 flex items-center gap-3 text-[10px] tracking-[0.24em] uppercase text-bone/50 font-medium">
                 <span>{d.tag}</span>
               </div>
-              <p className="mt-4 text-bone/70 leading-relaxed">{d.blurb}</p>
+              <p className="mt-3 text-sm text-bone/70 leading-relaxed">{d.blurb}</p>
             </article>
           ))}
         </div>
@@ -588,35 +626,35 @@ function Signature() {
 // ─── Pick of the day + Recipe spotlight ─────────────────────────────────
 function PickAndRecipe({ pick }: { pick: { name: string; desc: string } }) {
   return (
-    <section className="py-28 border-t border-bone/10 bg-card">
-      <div className="mx-auto max-w-7xl px-6 grid lg:grid-cols-2 gap-16">
+    <section className="py-24 border-t border-bone/10 bg-card">
+      <div className="mx-auto max-w-7xl px-6 grid lg:grid-cols-2 gap-12">
         {/* Pick of the day */}
         <div className="reveal relative border border-ember/30 overflow-hidden flex flex-col justify-between">
-          <div className="h-64 overflow-hidden relative">
+          <div className="h-60 overflow-hidden relative">
             <img
               src={kadaiChicken}
               alt="Featured Kadai Chicken"
               className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
               style={{ filter: "brightness(0.9) contrast(1.05)" }}
             />
-            <div className="absolute top-4 left-8 bg-card border border-ember/30 px-3 py-1 text-[10px] tracking-[0.32em] uppercase text-ember z-10">
+            <div className="absolute top-4 left-6 bg-card border border-ember/30 px-3 py-1 text-[10px] tracking-[0.28em] uppercase text-ember z-10 font-medium">
               Pick of the Day
             </div>
             <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
           </div>
-          <div className="p-8 sm:p-10 pt-4 flex-1 flex flex-col justify-between">
+          <div className="p-6 sm:p-8 pt-2 flex-1 flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2 text-ember">
-                <Sparkles size={18} strokeWidth={1.5} />
-                <span className="text-[10px] tracking-[0.24em] uppercase">Chef's Daily Selection</span>
+                <Sparkles size={16} strokeWidth={1.5} />
+                <span className="text-[10px] tracking-[0.24em] uppercase font-medium">Daily Special</span>
               </div>
-              <h3 className="mt-4 font-display text-4xl sm:text-5xl font-light leading-tight text-bone">
+              <h3 className="mt-3 font-display text-2xl sm:text-3xl font-medium leading-tight text-bone">
                 {pick.name}
               </h3>
-              <p className="mt-4 text-base text-bone/75 leading-relaxed max-w-md">{pick.desc}</p>
+              <p className="mt-3 text-sm text-bone/75 leading-relaxed max-w-md">{pick.desc}</p>
             </div>
-            <p className="mt-8 text-[11px] tracking-[0.28em] uppercase text-bone/50">
-              Chef's choice · Refreshed daily
+            <p className="mt-6 text-[10px] tracking-[0.28em] uppercase text-bone/50 font-medium">
+              Chef's recommendation
             </p>
           </div>
         </div>
@@ -624,40 +662,37 @@ function PickAndRecipe({ pick }: { pick: { name: string; desc: string } }) {
         {/* Recipe spotlight */}
         <div className="reveal stagger-2">
           <Overline>Recipe Spotlight</Overline>
-          <h3 className="mt-4 font-display text-4xl font-light">Paneer Butter Masala.</h3>
-          <p className="mt-3 text-bone/70 italic">A house recipe, unhurried.</p>
+          <h3 className="mt-3 font-display text-2xl sm:text-3xl font-medium">Paneer Butter Masala</h3>
+          <p className="mt-2 text-xs text-bone/60">A house favourite prepared fresh daily.</p>
 
-          <div className="mt-10 grid sm:grid-cols-2 gap-8">
+          <div className="mt-8 grid sm:grid-cols-2 gap-6">
             <div>
-              <h4 className="text-[10px] tracking-[0.28em] uppercase text-ember">Ingredients</h4>
-              <ul className="mt-4 space-y-2 text-bone/75 text-sm">
+              <h4 className="text-[10px] tracking-[0.28em] uppercase text-ember font-medium">Ingredients</h4>
+              <ul className="mt-3 space-y-1.5 text-bone/75 text-sm">
                 {[
-                  "250g paneer, cubed",
+                  "250g fresh paneer, cubed",
                   "4 ripe tomatoes",
                   "2 tbsp cashews, soaked",
-                  "50ml cream",
-                  "2 tbsp butter",
-                  "1 tsp kasuri methi",
-                  "Cardamom, cinnamon, salt",
+                  "Fresh cream & butter",
+                  "Kasuri methi & aromatic spices",
                 ].map((i) => (
-                  <li key={i} className="flex gap-3">
+                  <li key={i} className="flex gap-2.5">
                     <span className="text-ember/60">·</span>{i}
                   </li>
                 ))}
               </ul>
             </div>
             <div>
-              <h4 className="text-[10px] tracking-[0.28em] uppercase text-ember">Method</h4>
-              <ol className="mt-4 space-y-3 text-bone/75 text-sm">
+              <h4 className="text-[10px] tracking-[0.28em] uppercase text-ember font-medium">Preparation</h4>
+              <ol className="mt-3 space-y-2 text-bone/75 text-xs leading-relaxed">
                 {[
-                  "Blanch tomatoes and cashews; blend to a silk purée.",
-                  "Melt butter with whole spices; sweat, don't brown.",
-                  "Add purée, simmer until it darkens by two shades.",
-                  "Slip in paneer, cream, and crushed kasuri methi.",
-                  "Rest five minutes off the flame. Serve with naan.",
+                  "Blanch tomatoes and cashews; blend to smooth purée.",
+                  "Sauté spices lightly in butter.",
+                  "Simmer sauce until rich and deep in flavor.",
+                  "Add fresh paneer, cream, and kasuri methi before serving.",
                 ].map((s, i) => (
-                  <li key={i} className="flex gap-4">
-                    <span className="font-display text-ember w-5">{i + 1}</span>
+                  <li key={i} className="flex gap-3">
+                    <span className="font-display text-ember font-medium">{i + 1}.</span>
                     <span>{s}</span>
                   </li>
                 ))}
@@ -676,15 +711,15 @@ function FullMenu() {
   const current = MENU.find((m) => m.category === active) ?? MENU[0];
 
   return (
-    <section id="menu" className="py-28 border-t border-bone/10">
+    <section id="menu" className="py-24 border-t border-bone/10">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="grid lg:grid-cols-12 gap-12">
+        <div className="grid lg:grid-cols-12 gap-10">
           <div className="lg:col-span-4 reveal">
-            <Overline>The Menu</Overline>
-            <h2 className="mt-4 font-display text-5xl sm:text-6xl font-light leading-tight">
-              Read it like<br /><span className="italic text-ember">a good letter.</span>
+            <Overline>Our Menu</Overline>
+            <h2 className="mt-3 font-display text-3xl sm:text-4xl font-medium leading-tight">
+              Explore Our Offerings
             </h2>
-            <nav className="mt-10 flex flex-col gap-2">
+            <nav className="mt-8 flex flex-col gap-1.5">
               {MENU.map((s) => {
                 const IconComponent = CATEGORY_ICONS[s.category] || Utensils;
                 return (
@@ -693,7 +728,7 @@ function FullMenu() {
                     onClick={() => setActive(s.category)}
                     className={`flex items-center gap-3 text-left py-2.5 pl-4 border-l text-sm tracking-wide transition-all ${
                       active === s.category
-                        ? "border-ember text-ember bg-ember/5"
+                        ? "border-ember text-ember bg-ember/5 font-medium"
                         : "border-bone/10 text-bone/60 hover:text-bone hover:border-bone/40 hover:bg-bone/5"
                     }`}
                   >
@@ -706,26 +741,26 @@ function FullMenu() {
             <a
               href="/menu.pdf"
               download
-              className="mt-10 inline-flex items-center gap-2 text-[11px] tracking-[0.28em] uppercase text-ember hover:text-bone transition-colors"
+              className="mt-8 inline-flex items-center gap-2 text-[11px] tracking-[0.28em] uppercase text-ember hover:text-bone transition-colors font-medium"
             >
               <Download size={14} /> Download PDF Menu
             </a>
           </div>
 
           <div className="lg:col-span-8 reveal stagger-2">
-            <div className="border-t border-bone/10 pt-8">
-              <h3 className="font-display text-3xl text-bone mb-8">{current.category}</h3>
+            <div className="border-t border-bone/10 pt-6">
+              <h3 className="font-display text-2xl text-bone mb-6 font-medium">{current.category}</h3>
               <ul className="divide-y divide-bone/10">
                 {current.items.map((d) => {
                   const ItemIcon = getMenuItemIcon(d.name, current.category);
                   return (
-                    <li key={d.name} className="py-5 flex items-baseline gap-6 group">
+                    <li key={d.name} className="py-4 flex items-baseline gap-4 group">
                       <div className="flex items-center gap-3 flex-1">
                         {ItemIcon && <ItemIcon size={16} strokeWidth={1.5} className="text-ember/70 shrink-0 group-hover:text-ember transition-colors" />}
-                        <span className="font-display text-lg text-bone group-hover:text-ember transition-colors">{d.name}</span>
+                        <span className="font-display text-base sm:text-lg text-bone group-hover:text-ember transition-colors font-normal">{d.name}</span>
                       </div>
-                      <span className="hidden sm:block flex-1 border-b border-dotted border-bone/20 mb-2" />
-                      <span className="font-display text-lg text-ember whitespace-nowrap">{"\u20B9"}{d.price}</span>
+                      <span className="hidden sm:block flex-1 border-b border-dotted border-bone/20 mb-1" />
+                      <span className="font-display text-base sm:text-lg text-ember whitespace-nowrap font-medium">{"\u20B9"}{d.price}</span>
                     </li>
                   );
                 })}
@@ -741,28 +776,28 @@ function FullMenu() {
 // ─── Why us ─────────────────────────────────────────────────────────────
 function WhyUs() {
   const items = [
-    [Flame, "Tandoor to table", "Char, smoke, and speed — the way it should arrive."],
-    [Leaf, "Local mountain produce", "Sourced from Kangra valley farms whenever the season allows."],
-    [Wine, "Considered pours", "A short list of wines and cocktails, chosen not stocked."],
-    [Users, "Family-friendly", "Quiet corners, high chairs, and a menu for smaller appetites."],
-    [Mountain, "Locals-first", "Ten years of regulars — we remember your order."],
-    [Award, "Consistently rated", "4.7 across Google, Zomato and Tripadvisor."],
-    [Utensils, "Multi-cuisine", "North Indian, Chinese and Continental, done properly."],
-    [Clock, "Long hours", "Open 8am to 11pm, every day of the year."],
+    [Flame, "Tandoor to table", "Char, smoke, and speed — served hot and fresh."],
+    [Leaf, "Local mountain produce", "Sourced from Kangra valley farms whenever in season."],
+    [Wine, "Selected beverages", "A thoughtful list of beverages, teas, and refreshes."],
+    [Users, "Family-friendly", "Welcoming space for families, groups, and solo diners."],
+    [Mountain, "Locals-first", "Ten years of serving regular patrons in McLeod Ganj."],
+    [Award, "Highly rated", "4.7 average rating across Google, Zomato and Tripadvisor."],
+    [Utensils, "Multi-cuisine", "North Indian, Chinese and Continental favourites."],
+    [Clock, "Open daily", "Open 8am to 11pm, 365 days a year."],
   ] as const;
   return (
-    <section className="py-28 border-t border-bone/10">
+    <section className="py-24 border-t border-bone/10">
       <div className="mx-auto max-w-7xl px-6">
         <div className="reveal">
-          <Overline>Why The Den</Overline>
-          <h2 className="mt-4 font-display text-5xl font-light">Reasons to come back.</h2>
+          <Overline>Why Visit</Overline>
+          <h2 className="mt-3 font-display text-3xl sm:text-4xl font-medium">Reasons to Come Back</h2>
         </div>
-        <div className="mt-16 grid sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+        <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-10">
           {items.map(([Icon, title, blurb], i) => (
             <div key={title} className={`reveal stagger-${i + 1}`}>
-              <Icon size={22} strokeWidth={1.25} className="text-ember" />
-              <h3 className="mt-4 font-display text-xl text-bone">{title}</h3>
-              <p className="mt-2 text-sm text-bone/65 leading-relaxed">{blurb}</p>
+              <Icon size={20} strokeWidth={1.25} className="text-ember" />
+              <h3 className="mt-3 font-display text-lg text-bone font-medium">{title}</h3>
+              <p className="mt-1.5 text-xs text-bone/65 leading-relaxed">{blurb}</p>
             </div>
           ))}
         </div>
@@ -774,24 +809,20 @@ function WhyUs() {
 // ─── Chef ───────────────────────────────────────────────────────────────
 function Chef() {
   return (
-    <section className="py-28 border-t border-bone/10 bg-card">
-      <div className="mx-auto max-w-7xl px-6 grid lg:grid-cols-12 gap-12 items-center">
+    <section className="py-24 border-t border-bone/10 bg-card">
+      <div className="mx-auto max-w-7xl px-6 grid lg:grid-cols-12 gap-10 items-center">
         <div className="lg:col-span-5 reveal">
           <img src={chefPortrait} alt="Head Chef, The Den" className="w-full aspect-[4/5] object-cover" />
         </div>
-        <div className="lg:col-span-7 lg:pl-8">
-          <div className="reveal"><Overline>Meet the Chef</Overline></div>
-          <h2 className="reveal mt-4 font-display text-5xl font-light leading-tight">
-            The hand behind<br /><span className="italic text-ember">every plate.</span>
+        <div className="lg:col-span-7 lg:pl-6">
+          <div className="reveal"><Overline>Meet Our Chef</Overline></div>
+          <h2 className="reveal mt-3 font-display text-3xl sm:text-4xl font-medium leading-tight">
+            Passion in Every Dish
           </h2>
-          <p className="reveal mt-8 text-lg text-bone/75 leading-relaxed max-w-lg">
-            Our head chef has spent fifteen years chasing flavour across three cuisines —
-            trained in a Delhi kitchen, sharpened in Kolkata's Chinatown, and now settled in
-            the hills where she does the thing she loves most: cooking, quietly, for people
-            who arrive hungry.
-          </p>
-          <p className="reveal mt-4 text-sm text-bone/60 italic">
-            "The best compliment is a clean plate and a silent table."
+          <p className="reveal mt-6 text-base text-bone/75 leading-relaxed max-w-lg">
+            Our head chef brings over fifteen years of culinary expertise spanning North Indian,
+            Chinese, and Continental cuisines — bringing rich flavours and consistent quality to
+            every plate served at The Den.
           </p>
         </div>
       </div>
@@ -802,24 +833,21 @@ function Chef() {
 // ─── Testimonials ───────────────────────────────────────────────────────
 function Testimonials() {
   return (
-    <section className="py-28 border-t border-bone/10">
+    <section className="py-24 border-t border-bone/10">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="reveal"><Overline>Guests, on the record</Overline></div>
-        <div className="mt-14 grid md:grid-cols-3 gap-12">
+        <div className="reveal"><Overline>Guest Reviews</Overline></div>
+        <div className="mt-10 grid md:grid-cols-3 gap-8">
           {REVIEWS.map((r, i) => (
-            <figure key={r.name} className={`reveal stagger-${i + 1}`}>
-              <blockquote className="font-display text-2xl leading-snug text-bone italic text-balance">
-                “{r.text}”
+            <figure key={r.name} className={`reveal stagger-${i + 1} border border-bone/10 p-6 bg-card/40`}>
+              <blockquote className="font-sans text-sm sm:text-base leading-relaxed text-bone/90">
+                "{r.text}"
               </blockquote>
-              <figcaption className="mt-6 text-[11px] tracking-[0.24em] uppercase text-bone/50">
+              <figcaption className="mt-4 text-[10px] tracking-[0.24em] uppercase text-ember font-medium">
                 — {r.name} · {r.src}
               </figcaption>
             </figure>
           ))}
         </div>
-        <p className="reveal mt-16 text-xs text-bone/40 italic">
-          Reviews curated from around the web. Manually refreshed.
-        </p>
       </div>
     </section>
   );
@@ -827,25 +855,25 @@ function Testimonials() {
 
 // ─── Gallery ────────────────────────────────────────────────────────────
 function Gallery() {
-  const captions = ["The main room, after sundown", "Winter light through the arches", "A quiet fire, always lit"];
+  const captions = ["Main dining space", "Mountain view ambience", "Warm evening lighting"];
   return (
-    <section id="gallery" className="py-28 border-t border-bone/10">
+    <section id="gallery" className="py-24 border-t border-bone/10">
       <div className="mx-auto max-w-7xl px-6">
         <div className="reveal">
           <Overline>Inside The Den</Overline>
-          <h2 className="mt-4 font-display text-5xl font-light">Come see for yourself.</h2>
+          <h2 className="mt-3 font-display text-3xl sm:text-4xl font-medium">Ambience & Gallery</h2>
         </div>
-        <div className="mt-16 grid md:grid-cols-3 gap-4">
+        <div className="mt-12 grid md:grid-cols-3 gap-4">
           {GALLERY.map((src, i) => (
             <figure key={i} className={`reveal stagger-${i + 1} group relative overflow-hidden`}>
               <img
                 src={src}
                 alt={captions[i]}
-                className="w-full aspect-[4/3] object-cover transition-transform duration-1000 group-hover:scale-105"
-                style={{ filter: "sepia(0.1) contrast(1.05)" }}
+                className="w-full aspect-[4/3] object-cover transition-transform duration-700 group-hover:scale-105"
+                style={{ filter: "brightness(0.9) contrast(1.05)" }}
               />
-              <figcaption className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-obsidian to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                <span className="text-[11px] tracking-[0.24em] uppercase text-bone">{captions[i]}</span>
+              <figcaption className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-obsidian to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <span className="text-[10px] tracking-[0.24em] uppercase text-bone font-medium">{captions[i]}</span>
               </figcaption>
             </figure>
           ))}
@@ -871,79 +899,55 @@ Occasion: ${form.occasion}`;
     window.open(wa(msg), "_blank");
   };
   return (
-    <section id="extras" className="py-28 border-t border-bone/10 bg-card">
+    <section id="extras" className="py-24 border-t border-bone/10 bg-card">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="grid lg:grid-cols-12 gap-16">
+        <div className="grid lg:grid-cols-12 gap-12">
           <div className="lg:col-span-5 reveal">
             <Overline>Parties & Private Events</Overline>
-            <h2 className="mt-4 font-display text-5xl font-light leading-tight">
-              The room, <span className="italic text-ember">to yourself.</span>
+            <h2 className="mt-3 font-display text-3xl sm:text-4xl font-medium leading-tight">
+              Host Your Gathering
             </h2>
-            <p className="mt-6 text-bone/70 leading-relaxed max-w-md">
-              Birthdays, anniversaries, small weddings, and slow work dinners. We host groups
-              of 10 to 60 with a set menu tailored to the occasion.
+            <p className="mt-4 text-sm text-bone/70 leading-relaxed max-w-md">
+              Birthdays, anniversaries, corporate gatherings, and family dinners. We host groups
+              of 10 to 60 with customized set menus.
             </p>
-            <dl className="mt-10 space-y-4 text-sm">
+            <dl className="mt-8 space-y-3 text-sm">
               {[
                 ["Capacity", "10 – 60 guests"],
-                ["Occasions", "Birthdays · Anniversaries · Corporate · Small weddings"],
-                ["Confirms in", "Within 4 hours, over WhatsApp or call"],
+                ["Occasions", "Birthdays · Anniversaries · Corporate · Gatherings"],
+                ["Response", "Quick confirmation over WhatsApp or call"],
               ].map(([k, v]) => (
-                <div key={k} className="grid grid-cols-[110px_1fr] gap-4 border-b border-bone/10 pb-3">
-                  <dt className="text-[10px] tracking-[0.28em] uppercase text-bone/50">{k}</dt>
-                  <dd className="text-bone/85">{v}</dd>
+                <div key={k} className="grid grid-cols-[100px_1fr] gap-4 border-b border-bone/10 pb-2.5">
+                  <dt className="text-[10px] tracking-[0.28em] uppercase text-bone/50 font-medium">{k}</dt>
+                  <dd className="text-bone/85 text-xs">{v}</dd>
                 </div>
               ))}
             </dl>
           </div>
 
-          <form onSubmit={submit} className="lg:col-span-7 reveal stagger-2 space-y-5">
-            <div className="grid sm:grid-cols-2 gap-5">
+          <form onSubmit={submit} className="lg:col-span-7 reveal stagger-2 space-y-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Your name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} required />
               <Field label="Phone" type="tel" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} required />
               <Field label="Date" type="date" value={form.date} onChange={(v) => setForm({ ...form, date: v })} />
               <Field label="Guest count" type="number" value={form.guests} onChange={(v) => setForm({ ...form, guests: v })} />
             </div>
             <div>
-              <label className="text-[10px] tracking-[0.28em] uppercase text-bone/50">Occasion</label>
+              <label className="text-[10px] tracking-[0.28em] uppercase text-bone/50 font-medium">Occasion</label>
               <select
                 value={form.occasion}
                 onChange={(e) => setForm({ ...form, occasion: e.target.value })}
-                className="mt-2 w-full bg-transparent border-b border-bone/20 py-2 text-bone focus:outline-none focus:border-ember"
+                className="mt-2 w-full bg-transparent border-b border-bone/20 py-2 text-bone text-sm focus:outline-none focus:border-ember"
               >
                 {["Birthday", "Anniversary", "Corporate", "Wedding", "Other"].map((o) => (
                   <option key={o} className="bg-obsidian">{o}</option>
                 ))}
               </select>
             </div>
-            <div className="pt-4 flex flex-wrap gap-3 items-center">
+            <div className="pt-3 flex flex-wrap gap-3 items-center">
               <Btn type="submit"><MessageCircle size={14} /> Enquire via WhatsApp</Btn>
-              <span className="text-xs text-bone/50 italic">We'll confirm within 4 hours.</span>
             </div>
           </form>
-        </div>
-
-        {/* Reviews showcase */}
-        <div className="mt-28 border-t border-bone/10 pt-16">
-          <div className="reveal">
-            <Overline>Reviews Showcase</Overline>
-            <p className="mt-3 text-sm text-bone/50 italic">Reviews from around the web, manually refreshed.</p>
-          </div>
-          <div className="mt-10 flex gap-6 overflow-x-auto pb-4 -mx-6 px-6 snap-x snap-mandatory scrollbar-hide">
-            {REVIEWS.map((r, i) => (
-              <div
-                key={r.name}
-                className={`reveal stagger-${i + 1} flex-shrink-0 w-80 border border-bone/10 p-8 snap-start`}
-              >
-                <blockquote className="font-display text-lg leading-snug text-bone italic text-balance">
-                  "{r.text}"
-                </blockquote>
-                <div className="mt-6 text-[10px] tracking-[0.24em] uppercase text-bone/50">
-                  — {r.name} · {r.src}
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </section>
@@ -955,14 +959,14 @@ function Field({
 }: { label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean }) {
   return (
     <label className="block">
-      <span className="text-[10px] tracking-[0.28em] uppercase text-bone/50">{label}{required && " *"}</span>
+      <span className="text-[10px] tracking-[0.28em] uppercase text-bone/50 font-medium">{label}{required && " *"}</span>
       <input
         type={type}
         required={required}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         maxLength={120}
-        className="mt-2 w-full bg-transparent border-b border-bone/20 py-2 text-bone focus:outline-none focus:border-ember transition-colors"
+        className="mt-2 w-full bg-transparent border-b border-bone/20 py-2 text-bone text-sm focus:outline-none focus:border-ember transition-colors"
       />
     </label>
   );
@@ -984,33 +988,32 @@ Guests: ${form.guests}`;
     window.open(wa(msg), "_blank");
   };
   return (
-    <section id="reserve" className="py-28 border-t border-bone/10">
-      <div className="mx-auto max-w-4xl px-6 text-center">
+    <section id="reserve" className="py-24 border-t border-bone/10">
+      <div className="mx-auto max-w-3xl px-6 text-center">
         <div className="reveal"><Overline>Reservations</Overline></div>
-        <h2 className="reveal mt-4 font-display text-5xl sm:text-6xl font-light leading-tight text-balance">
-          Save a seat<br />
-          <span className="italic text-ember">by the fire.</span>
+        <h2 className="reveal mt-3 font-display text-3xl sm:text-4xl font-medium leading-tight text-balance">
+          Book Your Table
         </h2>
-        <form onSubmit={submit} className="reveal stagger-2 mt-14 grid sm:grid-cols-2 gap-6 text-left">
+        <form onSubmit={submit} className="reveal stagger-2 mt-10 grid sm:grid-cols-2 gap-5 text-left">
           <Field label="Name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} required />
           <Field label="Phone" type="tel" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} required />
           <Field label="Date" type="date" value={form.date} onChange={(v) => setForm({ ...form, date: v })} />
           <Field label="Time" type="time" value={form.time} onChange={(v) => setForm({ ...form, time: v })} />
           <div className="sm:col-span-2">
-            <label className="text-[10px] tracking-[0.28em] uppercase text-bone/50">Guests</label>
+            <label className="text-[10px] tracking-[0.28em] uppercase text-bone/50 font-medium">Guests</label>
             <select
               value={form.guests}
               onChange={(e) => setForm({ ...form, guests: e.target.value })}
-              className="mt-2 w-full bg-transparent border-b border-bone/20 py-2 text-bone focus:outline-none focus:border-ember"
+              className="mt-2 w-full bg-transparent border-b border-bone/20 py-2 text-bone text-sm focus:outline-none focus:border-ember"
             >
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, "10+"].map((g) => (
                 <option key={g} className="bg-obsidian">{g} {g === 1 ? "guest" : "guests"}</option>
               ))}
             </select>
           </div>
-          <div className="sm:col-span-2 pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="sm:col-span-2 pt-3 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Btn type="submit"><MessageCircle size={14} /> Send via WhatsApp</Btn>
-            <span className="text-sm text-bone/60">
+            <span className="text-xs text-bone/60">
               Prefer to call? <a href={`tel:${PHONE}`} className="text-ember hover:text-bone underline underline-offset-4">{PHONE_DISPLAY}</a>
             </span>
           </div>
@@ -1023,19 +1026,19 @@ Guests: ${form.guests}`;
 // ─── Contact ────────────────────────────────────────────────────────────
 function Contact({ isOpen }: { isOpen: boolean }) {
   return (
-    <section id="contact" className="py-28 border-t border-bone/10 bg-card">
-      <div className="mx-auto max-w-7xl px-6 grid lg:grid-cols-12 gap-12">
+    <section id="contact" className="py-24 border-t border-bone/10 bg-card">
+      <div className="mx-auto max-w-7xl px-6 grid lg:grid-cols-12 gap-10">
         <div className="lg:col-span-5">
           <div className="reveal"><Overline>Visit Us</Overline></div>
-          <h2 className="reveal mt-4 font-display text-5xl font-light">Come find us.</h2>
+          <h2 className="reveal mt-3 font-display text-3xl sm:text-4xl font-medium">Location & Contact</h2>
 
-          <div className="reveal stagger-2 mt-10 space-y-8">
+          <div className="reveal stagger-2 mt-8 space-y-6">
             <div className="flex gap-4">
               <MapPin size={18} className="text-ember mt-1 shrink-0" strokeWidth={1.5} />
               <div>
-                <div className="text-[10px] tracking-[0.28em] uppercase text-bone/50">Address</div>
-                <div className="mt-1 text-bone">{ADDRESS}</div>
-                <a href={MAPS_URL} target="_blank" rel="noopener" className="mt-2 inline-block text-xs tracking-[0.24em] uppercase text-ember hover:text-bone">
+                <div className="text-[10px] tracking-[0.28em] uppercase text-bone/50 font-medium">Address</div>
+                <div className="mt-1 text-sm text-bone">{ADDRESS}</div>
+                <a href={MAPS_URL} target="_blank" rel="noopener" className="mt-1.5 inline-block text-xs tracking-[0.2em] uppercase text-ember hover:text-bone font-medium">
                   Get directions
                 </a>
               </div>
@@ -1043,15 +1046,15 @@ function Contact({ isOpen }: { isOpen: boolean }) {
             <div className="flex gap-4">
               <Phone size={18} className="text-ember mt-1 shrink-0" strokeWidth={1.5} />
               <div>
-                <div className="text-[10px] tracking-[0.28em] uppercase text-bone/50">Phone & WhatsApp</div>
-                <a href={`tel:${PHONE}`} className="mt-1 block text-bone hover:text-ember">{PHONE_DISPLAY}</a>
+                <div className="text-[10px] tracking-[0.28em] uppercase text-bone/50 font-medium">Phone & WhatsApp</div>
+                <a href={`tel:${PHONE}`} className="mt-1 block text-sm text-bone hover:text-ember">{PHONE_DISPLAY}</a>
               </div>
             </div>
             <div className="flex gap-4">
               <Clock size={18} className="text-ember mt-1 shrink-0" strokeWidth={1.5} />
               <div>
-                <div className="text-[10px] tracking-[0.28em] uppercase text-bone/50">Hours</div>
-                <div className="mt-1 text-bone">Daily · 8:00 am – 11:00 pm</div>
+                <div className="text-[10px] tracking-[0.28em] uppercase text-bone/50 font-medium">Hours</div>
+                <div className="mt-1 text-sm text-bone">Daily · 8:00 am – 11:00 pm</div>
                 <div className={`mt-1 text-xs ${isOpen ? "text-glass" : "text-bone/50"}`}>
                   {isOpen ? "Open right now" : "Closed at the moment"}
                 </div>
@@ -1060,11 +1063,11 @@ function Contact({ isOpen }: { isOpen: boolean }) {
           </div>
 
           <div className="reveal stagger-3 mt-12 border border-ember/30 p-6">
-            <div className="text-[10px] tracking-[0.28em] uppercase text-ember">Confirm your booking</div>
-            <div className="mt-3 font-display text-2xl text-bone leading-snug">
+            <div className="text-[10px] tracking-[0.28em] uppercase text-ember font-medium">Confirm your booking</div>
+            <div className="mt-2 font-display text-xl text-bone leading-snug">
               Call or WhatsApp us directly for immediate confirmation.
             </div>
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-5 flex flex-wrap gap-3">
               <Btn href={`tel:${PHONE}`}><Phone size={14} /> Call {PHONE_DISPLAY}</Btn>
               <Btn href={wa("Hi, I'd like to confirm a booking at The Den.")} variant="outline"><MessageCircle size={14} /> WhatsApp</Btn>
             </div>
@@ -1121,6 +1124,10 @@ function Footer() {
     </footer>
   );
 }
+
+export const Route = createFileRoute("/")({
+  component: Index,
+});
 
 // ─── Mobile sticky call bar ─────────────────────────────────────────────
 function MobileCallBar() {
