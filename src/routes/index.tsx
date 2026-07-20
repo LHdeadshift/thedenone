@@ -403,12 +403,12 @@ function Header({
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6">
-        <a href="#home" className="flex items-baseline gap-2 group">
-          <span className="font-display font-medium tracking-wide text-bone text-xl sm:text-2xl group-hover:text-ember transition-colors">
+        <a href="#home" className="flex flex-col group">
+          <span className="font-display font-medium tracking-wide text-bone text-xl sm:text-2xl group-hover:text-ember transition-colors leading-tight">
             The Den
           </span>
-          <span className="hidden sm:inline text-[9px] tracking-[0.28em] uppercase text-ember/80 font-medium">
-            McLeod Ganj
+          <span className="text-[9px] tracking-[0.24em] uppercase text-ember/80 font-medium">
+            McLeod Ganj · Est. 2015
           </span>
         </a>
 
@@ -480,7 +480,7 @@ function Header({
 // ─── Hero ───────────────────────────────────────────────────────────────
 function Hero({ isOpen }: { isOpen: boolean }) {
   return (
-    <section id="home" className="relative min-h-dvh flex flex-col justify-between overflow-hidden">
+    <section id="home" className="relative min-h-dvh flex flex-col justify-center overflow-hidden">
       <img
         src={ambienceHero}
         alt="The Den — candlelit interior, McLeod Ganj"
@@ -489,46 +489,43 @@ function Hero({ isOpen }: { isOpen: boolean }) {
       />
       <div className="absolute inset-0 bg-gradient-to-b from-obsidian/70 via-obsidian/40 to-obsidian" />
       
-      {/* Main Hero Content */}
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pt-32 pb-8 sm:pt-36 sm:pb-12 flex-1 flex flex-col justify-center">
+      {/* Main Hero Content — shifted slightly higher */}
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pt-24 sm:pt-28 pb-10 my-auto">
         <div className="max-w-3xl fade-up">
-          <Overline>McLeod Ganj · Est. 2015</Overline>
-          <h1 className="mt-4 font-heading text-4xl sm:text-5xl md:text-6xl font-medium leading-[1.08] text-bone text-balance">
+          <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl font-medium leading-[1.08] text-bone text-balance">
             A candlelit table<br />
             <span className="text-ember">in the mountains.</span>
           </h1>
-          <p className="mt-4 text-sm sm:text-base text-bone/75 tracking-wide font-medium">
+          <p className="mt-3 sm:mt-4 text-sm sm:text-base text-bone/75 tracking-wide font-medium">
             Indian · Chinese · Continental — served nightly, by the fire.
           </p>
-          <div className="mt-8 sm:mt-10 flex flex-wrap gap-3">
+          <div className="mt-6 sm:mt-8 flex flex-wrap gap-3">
             <Btn href="#reserve">Reserve a Table</Btn>
             <Btn href="#menu" variant="outline">Explore the Menu <ChevronRight size={14} /></Btn>
           </div>
-        </div>
-      </div>
 
-      {/* Trust strip — flows in document layout at end of hero section & scrolls away naturally */}
-      <div className="relative z-10 border-t border-bone/10 bg-obsidian/80 backdrop-blur-sm mt-auto">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-          <div>
-            <div className="flex items-center justify-center gap-1 text-ember">
-              {[...Array(5)].map((_, i) => <Star key={i} size={12} fill="currentColor" strokeWidth={0} />)}
+          {/* Compact, transparent trust strip beneath Explore the Menu — scrolls away naturally */}
+          <div className="mt-8 pt-4 border-t border-bone/15 bg-transparent grid grid-cols-2 sm:grid-cols-4 gap-4 text-left">
+            <div>
+              <div className="flex items-center gap-1 text-ember">
+                {[...Array(5)].map((_, i) => <Star key={i} size={10} fill="currentColor" strokeWidth={0} />)}
+              </div>
+              <div className="mt-1 text-[9px] tracking-[0.2em] uppercase text-bone/60">4.7 · 820+ reviews</div>
             </div>
-            <div className="mt-1 text-[10px] tracking-[0.24em] uppercase text-bone/60">4.7 · 820+ reviews</div>
-          </div>
-          <div>
-            <div className="font-display text-xl text-bone">{"\u20B9\u20B9"}</div>
-            <div className="text-[10px] tracking-[0.24em] uppercase text-bone/60">Mid-range · {"\u20B9"}500–900 pp</div>
-          </div>
-          <div>
-            <div className={`font-display text-xl ${isOpen ? "text-glass" : "text-bone/60"}`}>
-              {isOpen ? "Open Now" : "Closed"}
+            <div>
+              <div className="font-display text-sm text-bone font-medium">{"\u20B9\u20B9"}</div>
+              <div className="text-[9px] tracking-[0.2em] uppercase text-bone/60">Mid-range · {"\u20B9"}500–900</div>
             </div>
-            <div className="text-[10px] tracking-[0.24em] uppercase text-bone/60">Daily · 8am – 11pm</div>
-          </div>
-          <div>
-            <div className="font-display text-xl text-bone">10 yrs</div>
-            <div className="text-[10px] tracking-[0.24em] uppercase text-bone/60">Feeding the town</div>
+            <div>
+              <div className={`font-display text-sm font-medium ${isOpen ? "text-glass" : "text-bone/60"}`}>
+                {isOpen ? "Open Now" : "Closed"}
+              </div>
+              <div className="text-[9px] tracking-[0.2em] uppercase text-bone/60">Daily · 8am – 11pm</div>
+            </div>
+            <div>
+              <div className="font-display text-sm text-bone font-medium">10 yrs</div>
+              <div className="text-[9px] tracking-[0.2em] uppercase text-bone/60">Feeding the town</div>
+            </div>
           </div>
         </div>
       </div>
