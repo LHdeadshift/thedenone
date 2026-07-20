@@ -614,8 +614,8 @@ export function Signature() {
               <div className="flex items-baseline justify-between gap-4 border-b border-bone/15 pb-3">
                 <div className="flex items-center gap-3">
                   {(() => {
-                    const ItemIcon = getMenuItemIcon(d.name, "");
-                    return ItemIcon && <ItemIcon size={18} strokeWidth={1.5} className="text-ember/80 group-hover:text-ember transition-colors shrink-0" />;
+                    const ItemIcon = getMenuItemIcon(d.name, "") || Utensils;
+                    return <ItemIcon size={18} strokeWidth={1.5} className="text-ember/80 group-hover:text-ember transition-colors shrink-0" />;
                   })()}
                   <h3 className="font-heading text-xl text-bone group-hover:text-ember transition-colors font-medium">{d.name}</h3>
                 </div>
@@ -762,11 +762,11 @@ export function FullMenu() {
               <h3 className="font-heading text-2xl text-bone mb-6 font-medium">{current.category}</h3>
               <ul className="divide-y divide-bone/10">
                 {current.items.map((d) => {
-                  const ItemIcon = getMenuItemIcon(d.name, current.category);
+                  const ItemIcon = getMenuItemIcon(d.name, current.category) || CATEGORY_ICONS[current.category] || Utensils;
                   return (
                     <li key={d.name} className="py-4 flex items-baseline gap-4 group">
                       <div className="flex items-center gap-3 flex-1">
-                        {ItemIcon && <ItemIcon size={16} strokeWidth={1.5} className="text-ember/70 shrink-0 group-hover:text-ember transition-colors" />}
+                        <ItemIcon size={16} strokeWidth={1.5} className="text-ember/70 shrink-0 group-hover:text-ember transition-colors" />
                         <span className="font-heading text-base sm:text-lg text-bone group-hover:text-ember transition-colors font-normal">{d.name}</span>
                       </div>
                       <span className="hidden sm:block flex-1 border-b border-dotted border-bone/20 mb-1" />
