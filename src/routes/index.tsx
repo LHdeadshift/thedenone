@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Phone,
@@ -32,7 +32,7 @@ import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useCountUp } from "@/hooks/useCountUp";
 import { useActiveSection } from "@/hooks/useActiveSection";
 
-const PHONE = "8587044000";
+export const PHONE = "8587044000";
 
 // ─── Custom Food Outline Icons ──────────────────────────────────────────
 type IconProps = { size?: number; className?: string; strokeWidth?: number };
@@ -116,18 +116,18 @@ const CATEGORY_ICONS: Record<string, React.ComponentType<IconProps>> = {
   "Chinese": NoodleIcon,
   "Desserts & Beverages": GlassWater,
 };
-const PHONE_DISPLAY = "+91 85870 44000";
-const WA = "918587044000";
-const MAPS_URL = "https://maps.app.goo.gl/NzuvBuMyLjCGQ7UT8";
-const ADDRESS = "McLeod Ganj, Dharamshala, Himachal Pradesh";
-const HOURS = { open: 8, close: 23 }; // 8am – 11pm
+export const PHONE_DISPLAY = "+91 85870 44000";
+export const WA = "918587044000";
+export const MAPS_URL = "https://maps.app.goo.gl/NzuvBuMyLjCGQ7UT8";
+export const ADDRESS = "McLeod Ganj, Dharamshala, Himachal Pradesh";
+export const HOURS = { open: 8, close: 23 }; // 8am – 11pm
 
-const wa = (msg: string) =>
+export const wa = (msg: string) =>
   `https://wa.me/${WA}?text=${encodeURIComponent(msg)}`;
 
 // ─── Menu data ──────────────────────────────────────────────────────────
-type Dish = { name: string; price: number; desc?: string };
-const MENU: { category: string; items: Dish[] }[] = [
+export type Dish = { name: string; price: number; desc?: string };
+export const MENU: { category: string; items: Dish[] }[] = [
   {
     category: "Starters",
     items: [
@@ -213,7 +213,7 @@ const MENU: { category: string; items: Dish[] }[] = [
   },
 ];
 
-const SIGNATURE: (Dish & { tag: string; blurb: string })[] = [
+export const SIGNATURE: (Dish & { tag: string; blurb: string })[] = [
   { name: "Butter Chicken", price: 520, tag: "House Favourite", blurb: "Slow-simmered tomato, cream, kissed by charcoal." },
   { name: "Mutton Rogan Josh", price: 680, tag: "Kashmiri", blurb: "Deep spice, patience, and mountain lamb." },
   { name: "Paneer Butter Masala", price: 360, tag: "Vegetarian", blurb: "Silken cottage cheese, velvet gravy." },
@@ -222,7 +222,7 @@ const SIGNATURE: (Dish & { tag: string; blurb: string })[] = [
   { name: "Kadai Paneer", price: 340, tag: "Fiery", blurb: "Bell peppers, crushed spice, the wok's roar." },
 ];
 
-const PICK_ROTATION = [
+export const PICK_ROTATION = [
   { name: "Mutton Rogan Josh", desc: "Tender lamb braised in Kashmiri chillies and yoghurt." },
   { name: "Butter Chicken", desc: "The dish that made the north famous." },
   { name: "Paneer Butter Masala", desc: "Cream, tomato, cardamom — the trinity." },
@@ -232,16 +232,16 @@ const PICK_ROTATION = [
   { name: "Fish Curry", desc: "Himalayan trout in mustard and curry leaf." },
 ];
 
-const REVIEWS = [
+export const REVIEWS = [
   { text: "Warm, dim, and the butter chicken is exactly right. We walked here twice in one week.", name: "Aditi R.", src: "Google" },
   { text: "A proper meal after a long trek. The mutton rogan josh is worth the climb up.", name: "James P.", src: "TripAdvisor" },
   { text: "Family friendly, quiet corners, and the staff remember your order the next night.", name: "Meera S.", src: "Zomato" },
 ];
 
-const GALLERY = [ambienceHero, ambience2, ambienceTea];
+export const GALLERY = [ambienceHero, ambience2, ambienceTea];
 
 // ─── helpers ────────────────────────────────────────────────────────────
-function useOpenStatus() {
+export function useOpenStatus() {
   const [open, setOpen] = useState(false);
   useEffect(() => {
     const check = () => {
@@ -255,7 +255,7 @@ function useOpenStatus() {
   return open;
 }
 
-function pickOfTheDay() {
+export function pickOfTheDay(): { name: string; desc: string } {
   const start = new Date(new Date().getFullYear(), 0, 0);
   const diff = Number(new Date()) - Number(start);
   const day = Math.floor(diff / 86_400_000);
@@ -263,7 +263,7 @@ function pickOfTheDay() {
 }
 
 // ─── Reusable UI ────────────────────────────────────────────────────────
-function Btn({
+export function Btn({
   children,
   variant = "primary",
   href,
@@ -285,11 +285,16 @@ function Btn({
     outline: "border border-bone/30 text-bone hover:border-ember hover:text-ember",
   }[variant];
   const cls = `${base} ${styles} ${className}`;
-  if (href) return <a href={href} className={cls} onClick={onClick}>{children}</a>;
+  if (href) {
+    if (href.startsWith("/")) {
+      return <Link to={href} className={cls} onClick={onClick}>{children}</Link>;
+    }
+    return <a href={href} className={cls} onClick={onClick}>{children}</a>;
+  }
   return <button type={type ?? "button"} onClick={onClick} className={cls}>{children}</button>;
 }
 
-function Overline({ children }: { children: React.ReactNode }) {
+export function Overline({ children }: { children: React.ReactNode }) {
   return (
     <div className="text-[11px] tracking-[0.3em] uppercase text-ember font-semibold">
       <span>{children}</span>
@@ -345,19 +350,18 @@ function Index() {
     <>
       {!loaderDone && <Loader3D onDone={handleLoaderDone} />}
       <div className="min-h-screen bg-background text-foreground pb-14 lg:pb-0">
-        <Header isOpen={isOpen} activeSection={activeSection} onOpenNav={() => setNavOpen(true)} />
-        <QuickNav open={navOpen} setOpen={setNavOpen} activeSection={activeSection} />
+        <Header isOpen={isOpen} onOpenNav={() => setNavOpen(true)} />
+        <QuickNav open={navOpen} setOpen={setNavOpen} activeSection="" />
         <Hero isOpen={isOpen} />
-        <About />
-        <Signature />
-        <PickAndRecipe pick={pick} />
-        <FullMenu />
-        <WhyUs />
-        <Chef />
-        <Testimonials />
-        <Gallery />
-        <Extras />
-        <Reserve />
+        
+        {/* Next page link */}
+        <div className="mx-auto max-w-7xl px-6 py-12 flex justify-end">
+          <Link to="/about" className="group inline-flex items-center gap-2 text-ember hover:text-bone transition-colors text-sm font-medium tracking-wide">
+            <span>Continue to Our Story</span>
+            <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+
         <Contact isOpen={isOpen} />
         <Footer />
         <MobileCallBar />
@@ -366,17 +370,18 @@ function Index() {
   );
 }
 
-// ─── Header ─────────────────────────────────────────────────────────────
-function Header({
+export function Header({
   isOpen,
-  activeSection,
   onOpenNav,
 }: {
   isOpen: boolean;
-  activeSection: string;
+  activeSection?: string;
   onOpenNav: () => void;
 }) {
   const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
+  const currentPath = location.pathname;
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     onScroll();
@@ -385,13 +390,11 @@ function Header({
   }, []);
 
   const nav = [
-    ["Home", "#home", "home"],
-    ["About", "#about", "about"],
-    ["Menu", "#menu", "menu"],
-    ["Gallery", "#gallery", "gallery"],
-    ["Reserve", "#reserve", "reserve"],
-    ["Extras", "#extras", "extras"],
-    ["Contact", "#contact", "contact"],
+    ["Home", "/", "home"],
+    ["About", "/about", "about"],
+    ["Menu", "/menu", "menu"],
+    ["Gallery", "/gallery", "gallery"],
+    ["Reserve", "/reserve", "reserve"],
   ];
 
   return (
@@ -403,23 +406,23 @@ function Header({
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6">
-        <a href="#home" className="flex flex-col group">
+        <Link to="/" className="flex flex-col group">
           <span className="font-display font-medium tracking-wide text-bone text-xl sm:text-2xl group-hover:text-ember transition-colors leading-tight">
             The Den
           </span>
           <span className="text-[9px] tracking-[0.24em] uppercase text-ember/80 font-medium">
             McLeod Ganj · Est. 2015
           </span>
-        </a>
+        </Link>
 
         {/* Desktop Navbar with Section Highlighting & Bold + Bigger Font for Active Section */}
         <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
           {nav.map(([label, href, id]) => {
-            const isActive = activeSection === id;
+            const isActive = currentPath === href;
             return (
-              <a
+              <Link
                 key={href}
-                href={href}
+                to={href}
                 className={`relative py-1 transition-all duration-300 tracking-[0.24em] uppercase ${
                   isActive
                     ? "text-ember font-bold text-xs sm:text-sm drop-shadow-[0_0_8px_rgba(238,154,84,0.4)] scale-105"
@@ -430,7 +433,7 @@ function Header({
                 {isActive && (
                   <span className="absolute -bottom-1 left-0 right-0 h-[2px] bg-ember rounded-full shadow-[0_0_8px_#ee9a54]" />
                 )}
-              </a>
+              </Link>
             );
           })}
         </nav>
@@ -478,9 +481,9 @@ function Header({
 }
 
 // ─── Hero ───────────────────────────────────────────────────────────────
-function Hero({ isOpen }: { isOpen: boolean }) {
+export function Hero({ isOpen }: { isOpen: boolean }) {
   return (
-    <section id="home" className="relative min-h-dvh flex flex-col justify-center overflow-hidden">
+    <section id="home" className="relative min-h-dvh flex flex-col justify-end pb-8 sm:pb-12 overflow-hidden">
       <img
         src={ambienceHero}
         alt="The Den — candlelit interior, McLeod Ganj"
@@ -489,28 +492,32 @@ function Hero({ isOpen }: { isOpen: boolean }) {
       />
       <div className="absolute inset-0 bg-gradient-to-b from-obsidian/70 via-obsidian/40 to-obsidian" />
       
-      {/* Main Hero Content — shifted slightly higher */}
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pt-24 sm:pt-28 pb-10 my-auto">
-        <div className="max-w-3xl fade-up">
-          <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl font-medium leading-[1.08] text-bone text-balance">
+      {/* Main Hero Content — pushed to the bottom-left to leave space in the middle */}
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-6 flex justify-start">
+        <div className="max-w-md sm:max-w-lg lg:max-w-xl fade-up text-left">
+          <h1 className="font-heading text-2xl sm:text-3xl md:text-4xl font-semibold leading-[1.1] text-bone text-balance tracking-tight">
             A candlelit table<br />
             <span className="text-ember">in the mountains.</span>
           </h1>
-          <p className="mt-3 sm:mt-4 text-sm sm:text-base text-bone/75 tracking-wide font-medium">
+          <p className="mt-1.5 text-xs sm:text-sm text-bone/70 leading-relaxed font-medium">
             Indian · Chinese · Continental — served nightly, by the fire.
           </p>
-          <div className="mt-6 sm:mt-8 flex flex-wrap gap-3">
-            <Btn href="#reserve">Reserve a Table</Btn>
-            <Btn href="#menu" variant="outline">Explore the Menu <ChevronRight size={14} /></Btn>
+          
+          {/* Main sections pushed to the left, shorter CTA buttons */}
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Btn href="/reserve" className="py-2 px-3 text-[10px]">Reserve a Table</Btn>
+            <Btn href="/menu" variant="outline" className="py-2 px-3 text-[10px]">Explore the Menu <ChevronRight size={11} /></Btn>
+            <Btn href="/about" variant="outline" className="py-2 px-3 text-[10px]">Our Story</Btn>
+            <Btn href="/gallery" variant="outline" className="py-2 px-3 text-[10px]">Gallery</Btn>
           </div>
 
-          {/* Compact, transparent trust strip beneath Explore the Menu — scrolls away naturally */}
-          <div className="mt-8 pt-4 border-t border-bone/15 bg-transparent grid grid-cols-2 sm:grid-cols-4 gap-4 text-left">
+          {/* Compact, transparent trust strip — 2x2 grid strictly on the left to align with standing figure's height */}
+          <div className="mt-5 pt-3 border-t border-bone/15 bg-transparent grid grid-cols-2 gap-x-4 gap-y-3 max-w-[280px] sm:max-w-[320px] text-left">
             <div>
               <div className="flex items-center gap-1 text-ember">
-                {[...Array(5)].map((_, i) => <Star key={i} size={10} fill="currentColor" strokeWidth={0} />)}
+                {[...Array(5)].map((_, i) => <Star key={i} size={9} fill="currentColor" strokeWidth={0} />)}
               </div>
-              <div className="mt-1 text-[9px] tracking-[0.2em] uppercase text-bone/60">4.7 · 820+ reviews</div>
+              <div className="mt-0.5 text-[9px] tracking-[0.2em] uppercase text-bone/60">4.7 · 820+ reviews</div>
             </div>
             <div>
               <div className="font-display text-sm text-bone font-medium">{"\u20B9\u20B9"}</div>
@@ -545,7 +552,7 @@ function StatCounter({ target, decimals = 0, suffix = "", label }: { target: num
 }
 
 // ─── About ──────────────────────────────────────────────────────────────
-function About() {
+export function About() {
   return (
     <section id="about" className="py-28 sm:py-40">
       <div className="mx-auto max-w-7xl px-6 grid lg:grid-cols-12 gap-12 lg:gap-20 items-start">
@@ -581,7 +588,7 @@ function About() {
 }
 
 // ─── Signature dishes ───────────────────────────────────────────────────
-function Signature() {
+export function Signature() {
   return (
     <section className="py-24 border-t border-bone/10">
       <div className="mx-auto max-w-7xl px-6">
@@ -623,7 +630,7 @@ function Signature() {
 }
 
 // ─── Pick of the day + Recipe spotlight ─────────────────────────────────
-function PickAndRecipe({ pick }: { pick: { name: string; desc: string } }) {
+export function PickAndRecipe({ pick }: { pick: { name: string; desc: string } }) {
   return (
     <section className="py-24 border-t border-bone/10 bg-card">
       <div className="mx-auto max-w-7xl px-6 grid lg:grid-cols-2 gap-12">
@@ -705,7 +712,7 @@ function PickAndRecipe({ pick }: { pick: { name: string; desc: string } }) {
 }
 
 // ─── Full menu ──────────────────────────────────────────────────────────
-function FullMenu() {
+export function FullMenu() {
   const [active, setActive] = useState(MENU[0].category);
   const current = MENU.find((m) => m.category === active) ?? MENU[0];
 
@@ -773,7 +780,7 @@ function FullMenu() {
 }
 
 // ─── Why us ─────────────────────────────────────────────────────────────
-function WhyUs() {
+export function WhyUs() {
   const items = [
     [Flame, "Tandoor to table", "Char, smoke, and speed — served hot and fresh."],
     [Leaf, "Local mountain produce", "Sourced from Kangra valley farms whenever in season."],
@@ -806,7 +813,7 @@ function WhyUs() {
 }
 
 // ─── Chef ───────────────────────────────────────────────────────────────
-function Chef() {
+export function Chef() {
   return (
     <section className="py-24 border-t border-bone/10 bg-card">
       <div className="mx-auto max-w-7xl px-6 grid lg:grid-cols-12 gap-10 items-center">
@@ -830,7 +837,7 @@ function Chef() {
 }
 
 // ─── Testimonials ───────────────────────────────────────────────────────
-function Testimonials() {
+export function Testimonials() {
   return (
     <section className="py-24 border-t border-bone/10">
       <div className="mx-auto max-w-7xl px-6">
@@ -853,7 +860,7 @@ function Testimonials() {
 }
 
 // ─── Gallery ────────────────────────────────────────────────────────────
-function Gallery() {
+export function Gallery() {
   const captions = ["Main dining space", "Mountain view ambience", "Warm evening lighting"];
   return (
     <section id="gallery" className="py-24 border-t border-bone/10">
@@ -883,7 +890,7 @@ function Gallery() {
 }
 
 // ─── Extras: Party booking + reviews showcase ──────────────────────────
-function Extras() {
+export function Extras() {
   const [form, setForm] = useState({ name: "", phone: "", date: "", guests: "", occasion: "Birthday" });
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -972,7 +979,7 @@ function Field({
 }
 
 // ─── Reserve ────────────────────────────────────────────────────────────
-function Reserve() {
+export function Reserve() {
   const [form, setForm] = useState({ name: "", phone: "", date: "", time: "19:30", guests: "2" });
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1023,7 +1030,7 @@ Guests: ${form.guests}`;
 }
 
 // ─── Contact ────────────────────────────────────────────────────────────
-function Contact({ isOpen }: { isOpen: boolean }) {
+export function Contact({ isOpen }: { isOpen: boolean }) {
   return (
     <section id="contact" className="py-24 border-t border-bone/10 bg-card">
       <div className="mx-auto max-w-7xl px-6 grid lg:grid-cols-12 gap-10">
@@ -1090,7 +1097,7 @@ function Contact({ isOpen }: { isOpen: boolean }) {
 }
 
 // ─── Footer ─────────────────────────────────────────────────────────────
-function Footer() {
+export function Footer() {
   return (
     <footer className="border-t border-bone/10 py-16">
       <div className="mx-auto max-w-7xl px-6 grid md:grid-cols-4 gap-10">
@@ -1105,6 +1112,16 @@ function Footer() {
           <div className="text-sm text-bone/75 space-y-2">
             <div>{ADDRESS}</div>
             <div>Daily · 8am – 11pm</div>
+          </div>
+        </div>
+        <div>
+          <div className="text-[10px] tracking-[0.28em] uppercase text-bone/50 mb-4">Explore</div>
+          <div className="text-sm space-y-2 font-normal">
+            <Link to="/" className="block text-bone/75 hover:text-ember transition-colors">Home</Link>
+            <Link to="/about" className="block text-bone/75 hover:text-ember transition-colors">Our Story & About</Link>
+            <Link to="/menu" className="block text-bone/75 hover:text-ember transition-colors">Our Menu</Link>
+            <Link to="/gallery" className="block text-bone/75 hover:text-ember transition-colors">Gallery & Reviews</Link>
+            <Link to="/reserve" className="block text-bone/75 hover:text-ember transition-colors">Reserve a Table</Link>
           </div>
         </div>
         <div>
@@ -1129,7 +1146,7 @@ export const Route = createFileRoute("/")({
 });
 
 // ─── Mobile sticky call bar ─────────────────────────────────────────────
-function MobileCallBar() {
+export function MobileCallBar() {
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 lg:hidden bg-obsidian/95 backdrop-blur border-t border-bone/10 grid grid-cols-2">
       <a href={`tel:${PHONE}`} className="flex items-center justify-center gap-2 py-4 text-xs tracking-[0.2em] uppercase text-bone">

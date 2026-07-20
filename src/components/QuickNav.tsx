@@ -1,28 +1,29 @@
 import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
+import { Link, useLocation } from "@tanstack/react-router";
 
 const SECTIONS = [
-  { label: "Home", id: "home" },
-  { label: "About", id: "about" },
-  { label: "Menu", id: "menu" },
-  { label: "Gallery", id: "gallery" },
-  { label: "Reserve", id: "reserve" },
-  { label: "Extras", id: "extras" },
-  { label: "Contact", id: "contact" },
+  { label: "Home", to: "/" },
+  { label: "About", to: "/about" },
+  { label: "Menu", to: "/menu" },
+  { label: "Gallery", to: "/gallery" },
+  { label: "Reserve", to: "/reserve" },
 ];
 
 interface QuickNavProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  activeSection: string;
+  activeSection?: string;
 }
 
 /**
  * Slide-out navigation panel.
  * Focus-trapped, Esc-dismissible, highlights active section in bold & bigger font.
  */
-export function QuickNav({ open, setOpen, activeSection }: QuickNavProps) {
+export function QuickNav({ open, setOpen }: QuickNavProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const currentPath = location.pathname;
 
   // Keyboard: Esc to close & focus trap
   useEffect(() => {
@@ -93,12 +94,12 @@ export function QuickNav({ open, setOpen, activeSection }: QuickNavProps) {
         </div>
 
         <nav className="flex-1 flex flex-col justify-center px-8 gap-2">
-          {SECTIONS.map(({ label, id }) => {
-            const isActive = activeSection === id;
+          {SECTIONS.map(({ label, to }) => {
+            const isActive = currentPath === to;
             return (
-              <a
-                key={id}
-                href={`#${id}`}
+              <Link
+                key={to}
+                to={to}
                 onClick={() => setOpen(false)}
                 className={`flex items-center justify-between py-2.5 tracking-wide transition-all ${
                   isActive
@@ -108,7 +109,7 @@ export function QuickNav({ open, setOpen, activeSection }: QuickNavProps) {
               >
                 <span>{label}</span>
                 {isActive && <span className="h-2 w-2 rounded-full bg-ember animate-pulse" />}
-              </a>
+              </Link>
             );
           })}
         </nav>
