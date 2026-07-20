@@ -499,7 +499,7 @@ export function Hero({ isOpen }: { isOpen: boolean }) {
             A candlelit table<br />
             <span className="text-ember">in the mountains.</span>
           </h1>
-          <p className="mt-2 text-xl sm:text-2xl md:text-3xl text-bone/90 font-accent tracking-wide leading-relaxed">
+          <p className="mt-1.5 text-xs sm:text-sm text-bone/70 tracking-wide font-sans leading-relaxed">
             Indian · Chinese · Continental — served nightly, by the fire.
           </p>
           
