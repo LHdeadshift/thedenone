@@ -491,7 +491,7 @@ function Hero({ isOpen }: { isOpen: boolean }) {
       <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-20 pt-32 sm:pb-28">
         <div className="max-w-3xl fade-up">
           <Overline>McLeod Ganj · Est. 2015</Overline>
-          <h1 className="mt-4 font-display text-4xl sm:text-5xl md:text-6xl font-medium leading-[1.08] text-bone text-balance">
+          <h1 className="mt-4 font-heading text-4xl sm:text-5xl md:text-6xl font-medium leading-[1.08] text-bone text-balance">
             A candlelit table<br />
             <span className="text-ember">in the mountains.</span>
           </h1>
@@ -555,7 +555,7 @@ function About() {
         </div>
         <div className="lg:col-span-7 lg:pt-12">
           <div className="reveal"><Overline>Our Story</Overline></div>
-          <h2 className="reveal mt-4 font-display text-3xl sm:text-4xl md:text-5xl font-medium leading-tight text-balance">
+          <h2 className="reveal mt-4 font-heading text-3xl sm:text-4xl md:text-5xl font-medium leading-tight text-balance">
             Ten years of cooking in McLeod Ganj.
           </h2>
           <div className="reveal mt-6 space-y-4 text-base text-bone/75 leading-relaxed max-w-xl">
@@ -589,7 +589,7 @@ function Signature() {
         <div className="reveal flex flex-wrap items-end justify-between gap-6">
           <div>
             <Overline>Kitchen Favourites</Overline>
-            <h2 className="mt-3 font-display text-3xl sm:text-4xl font-medium">Signature Dishes</h2>
+            <h2 className="mt-3 font-heading text-3xl sm:text-4xl font-medium">Signature Dishes</h2>
           </div>
           <a href="#menu" className="text-[11px] tracking-[0.28em] uppercase text-ember hover:text-bone transition-colors inline-flex items-center gap-2 font-medium">
             Full menu <ChevronRight size={14} />
@@ -648,7 +648,7 @@ function PickAndRecipe({ pick }: { pick: { name: string; desc: string } }) {
                 <Sparkles size={16} strokeWidth={1.5} />
                 <span className="text-[10px] tracking-[0.24em] uppercase font-medium">Daily Special</span>
               </div>
-              <h3 className="mt-3 font-display text-2xl sm:text-3xl font-medium leading-tight text-bone">
+              <h3 className="mt-3 font-heading text-2xl sm:text-3xl font-medium leading-tight text-bone">
                 {pick.name}
               </h3>
               <p className="mt-3 text-sm text-bone/75 leading-relaxed max-w-md">{pick.desc}</p>
@@ -662,7 +662,7 @@ function PickAndRecipe({ pick }: { pick: { name: string; desc: string } }) {
         {/* Recipe spotlight */}
         <div className="reveal stagger-2">
           <Overline>Recipe Spotlight</Overline>
-          <h3 className="mt-3 font-display text-2xl sm:text-3xl font-medium">Paneer Butter Masala</h3>
+          <h3 className="mt-3 font-heading text-2xl sm:text-3xl font-medium">Paneer Butter Masala</h3>
           <p className="mt-2 text-xs text-bone/60">A house favourite prepared fresh daily.</p>
 
           <div className="mt-8 grid sm:grid-cols-2 gap-6">
@@ -716,7 +716,7 @@ function FullMenu() {
         <div className="grid lg:grid-cols-12 gap-10">
           <div className="lg:col-span-4 reveal">
             <Overline>Our Menu</Overline>
-            <h2 className="mt-3 font-display text-3xl sm:text-4xl font-medium leading-tight">
+            <h2 className="mt-3 font-heading text-3xl sm:text-4xl font-medium leading-tight">
               Explore Our Offerings
             </h2>
             <nav className="mt-8 flex flex-col gap-1.5">
@@ -749,7 +749,7 @@ function FullMenu() {
 
           <div className="lg:col-span-8 reveal stagger-2">
             <div className="border-t border-bone/10 pt-6">
-              <h3 className="font-display text-2xl text-bone mb-6 font-medium">{current.category}</h3>
+              <h3 className="font-heading text-2xl text-bone mb-6 font-medium">{current.category}</h3>
               <ul className="divide-y divide-bone/10">
                 {current.items.map((d) => {
                   const ItemIcon = getMenuItemIcon(d.name, current.category);
@@ -790,13 +790,13 @@ function WhyUs() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="reveal">
           <Overline>Why Visit</Overline>
-          <h2 className="mt-3 font-display text-3xl sm:text-4xl font-medium">Reasons to Come Back</h2>
+          <h2 className="mt-3 font-heading text-3xl sm:text-4xl font-medium">Reasons to Come Back</h2>
         </div>
         <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-10">
           {items.map(([Icon, title, blurb], i) => (
             <div key={title} className={`reveal stagger-${i + 1}`}>
               <Icon size={20} strokeWidth={1.25} className="text-ember" />
-              <h3 className="mt-3 font-display text-lg text-bone font-medium">{title}</h3>
+              <h3 className="mt-3 font-heading text-lg text-bone font-medium">{title}</h3>
               <p className="mt-1.5 text-xs text-bone/65 leading-relaxed">{blurb}</p>
             </div>
           ))}
@@ -816,7 +816,7 @@ function Chef() {
         </div>
         <div className="lg:col-span-7 lg:pl-6">
           <div className="reveal"><Overline>Meet Our Chef</Overline></div>
-          <h2 className="reveal mt-3 font-display text-3xl sm:text-4xl font-medium leading-tight">
+          <h2 className="reveal mt-3 font-heading text-3xl sm:text-4xl font-medium leading-tight">
             Passion in Every Dish
           </h2>
           <p className="reveal mt-6 text-base text-bone/75 leading-relaxed max-w-lg">
@@ -861,7 +861,7 @@ function Gallery() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="reveal">
           <Overline>Inside The Den</Overline>
-          <h2 className="mt-3 font-display text-3xl sm:text-4xl font-medium">Ambience & Gallery</h2>
+          <h2 className="mt-3 font-heading text-3xl sm:text-4xl font-medium">Ambience & Gallery</h2>
         </div>
         <div className="mt-12 grid md:grid-cols-3 gap-4">
           {GALLERY.map((src, i) => (
@@ -904,7 +904,7 @@ Occasion: ${form.occasion}`;
         <div className="grid lg:grid-cols-12 gap-12">
           <div className="lg:col-span-5 reveal">
             <Overline>Parties & Private Events</Overline>
-            <h2 className="mt-3 font-display text-3xl sm:text-4xl font-medium leading-tight">
+            <h2 className="mt-3 font-heading text-3xl sm:text-4xl font-medium leading-tight">
               Host Your Gathering
             </h2>
             <p className="mt-4 text-sm text-bone/70 leading-relaxed max-w-md">
@@ -991,7 +991,7 @@ Guests: ${form.guests}`;
     <section id="reserve" className="py-24 border-t border-bone/10">
       <div className="mx-auto max-w-3xl px-6 text-center">
         <div className="reveal"><Overline>Reservations</Overline></div>
-        <h2 className="reveal mt-3 font-display text-3xl sm:text-4xl font-medium leading-tight text-balance">
+        <h2 className="reveal mt-3 font-heading text-3xl sm:text-4xl font-medium leading-tight text-balance">
           Book Your Table
         </h2>
         <form onSubmit={submit} className="reveal stagger-2 mt-10 grid sm:grid-cols-2 gap-5 text-left">
@@ -1030,7 +1030,7 @@ function Contact({ isOpen }: { isOpen: boolean }) {
       <div className="mx-auto max-w-7xl px-6 grid lg:grid-cols-12 gap-10">
         <div className="lg:col-span-5">
           <div className="reveal"><Overline>Visit Us</Overline></div>
-          <h2 className="reveal mt-3 font-display text-3xl sm:text-4xl font-medium">Location & Contact</h2>
+          <h2 className="reveal mt-3 font-heading text-3xl sm:text-4xl font-medium">Location & Contact</h2>
 
           <div className="reveal stagger-2 mt-8 space-y-6">
             <div className="flex gap-4">
@@ -1096,7 +1096,7 @@ function Footer() {
     <footer className="border-t border-bone/10 py-16">
       <div className="mx-auto max-w-7xl px-6 grid md:grid-cols-4 gap-10">
         <div className="md:col-span-2">
-          <div className="font-display text-3xl text-bone">The Den</div>
+          <div className="font-heading text-3xl text-bone">The Den</div>
           <p className="mt-3 text-sm text-bone/60 italic max-w-xs">
             A candlelit table in the mountains. McLeod Ganj, since 2015.
           </p>
