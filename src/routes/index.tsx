@@ -488,7 +488,9 @@ function Hero({ isOpen }: { isOpen: boolean }) {
         style={{ filter: "brightness(0.55) saturate(1.05)" }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-obsidian/70 via-obsidian/40 to-obsidian" />
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pt-28 pb-44 sm:pt-36 sm:pb-36 lg:pb-28 my-auto">
+      
+      {/* Main Hero Content */}
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pt-32 pb-8 sm:pt-36 sm:pb-12 flex-1 flex flex-col justify-center">
         <div className="max-w-3xl fade-up">
           <Overline>McLeod Ganj · Est. 2015</Overline>
           <h1 className="mt-4 font-heading text-4xl sm:text-5xl md:text-6xl font-medium leading-[1.08] text-bone text-balance">
@@ -498,16 +500,16 @@ function Hero({ isOpen }: { isOpen: boolean }) {
           <p className="mt-4 text-sm sm:text-base text-bone/75 tracking-wide font-medium">
             Indian · Chinese · Continental — served nightly, by the fire.
           </p>
-          <div className="mt-10 flex flex-wrap gap-3">
+          <div className="mt-8 sm:mt-10 flex flex-wrap gap-3">
             <Btn href="#reserve">Reserve a Table</Btn>
             <Btn href="#menu" variant="outline">Explore the Menu <ChevronRight size={14} /></Btn>
           </div>
         </div>
       </div>
 
-      {/* Trust strip — positioned above sticky mobile call bar on mobile */}
-      <div className="absolute bottom-14 lg:bottom-0 inset-x-0 z-10 border-t border-bone/10 bg-obsidian/90 lg:bg-obsidian/60 backdrop-blur-sm">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-2.5 sm:py-4 grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4 text-center">
+      {/* Trust strip — flows in document layout at end of hero section & scrolls away naturally */}
+      <div className="relative z-10 border-t border-bone/10 bg-obsidian/80 backdrop-blur-sm mt-auto">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
           <div>
             <div className="flex items-center justify-center gap-1 text-ember">
               {[...Array(5)].map((_, i) => <Star key={i} size={12} fill="currentColor" strokeWidth={0} />)}
