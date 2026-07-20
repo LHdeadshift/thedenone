@@ -278,7 +278,7 @@ export function Btn({
   type?: "button" | "submit";
   className?: string;
 }) {
-  const base = "inline-flex items-center justify-center gap-2 px-6 py-3 text-xs tracking-[0.2em] uppercase font-medium transition-all duration-300";
+  const base = "inline-flex items-center justify-center gap-2 px-6 py-3 text-xs tracking-[0.2em] uppercase font-semibold transition-all duration-300";
   const styles = {
     primary: "bg-ember text-obsidian hover:bg-bone shadow-md hover:shadow-ember/20",
     ghost: "text-bone hover:text-ember",
@@ -499,16 +499,20 @@ export function Hero({ isOpen }: { isOpen: boolean }) {
             A candlelit table<br />
             <span className="text-ember">in the mountains.</span>
           </h1>
-          <p className="mt-1.5 text-xs sm:text-sm text-bone/70 leading-relaxed font-medium">
+          <p className="mt-2 text-xl sm:text-2xl md:text-3xl text-bone/90 font-accent tracking-wide leading-relaxed">
             Indian · Chinese · Continental — served nightly, by the fire.
           </p>
           
-          {/* Main sections pushed to the left, shorter CTA buttons */}
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Btn href="/reserve" className="py-2 px-3 text-[10px]">Reserve a Table</Btn>
-            <Btn href="/menu" variant="outline" className="py-2 px-3 text-[10px]">Explore the Menu <ChevronRight size={11} /></Btn>
-            <Btn href="/about" variant="outline" className="py-2 px-3 text-[10px]">Our Story</Btn>
-            <Btn href="/gallery" variant="outline" className="py-2 px-3 text-[10px]">Gallery</Btn>
+          {/* Main sections pushed to the left, shorter CTA buttons in 2 rows */}
+          <div className="mt-4 flex flex-col gap-2 max-w-sm sm:max-w-md">
+            <div className="flex gap-2">
+              <Btn href="/reserve" className="py-2 px-3 text-[10px] flex-1 sm:flex-initial">Reserve a Table</Btn>
+              <Btn href="/about" variant="outline" className="py-2 px-3 text-[10px] flex-1 sm:flex-initial">Our Story</Btn>
+            </div>
+            <div className="flex gap-2">
+              <Btn href="/menu" variant="outline" className="py-2 px-3 text-[10px] flex-1 sm:flex-initial">Explore the Menu <ChevronRight size={11} /></Btn>
+              <Btn href="/gallery" variant="outline" className="py-2 px-3 text-[10px] flex-1 sm:flex-initial">Gallery</Btn>
+            </div>
           </div>
 
           {/* Compact, transparent trust strip — 2x2 grid strictly on the left to align with standing figure's height */}
@@ -613,9 +617,9 @@ export function Signature() {
                     const ItemIcon = getMenuItemIcon(d.name, "");
                     return ItemIcon && <ItemIcon size={18} strokeWidth={1.5} className="text-ember/80 group-hover:text-ember transition-colors shrink-0" />;
                   })()}
-                  <h3 className="font-display text-xl text-bone group-hover:text-ember transition-colors font-medium">{d.name}</h3>
+                  <h3 className="font-heading text-xl text-bone group-hover:text-ember transition-colors font-medium">{d.name}</h3>
                 </div>
-                <span className="font-display text-lg text-ember whitespace-nowrap font-medium">{"\u20B9"}{d.price}</span>
+                <span className="font-heading text-lg text-ember whitespace-nowrap font-medium">{"\u20B9"}{d.price}</span>
               </div>
               <div className="mt-2 flex items-center gap-3 text-[10px] tracking-[0.24em] uppercase text-bone/50 font-medium">
                 <span>{d.tag}</span>
@@ -763,10 +767,10 @@ export function FullMenu() {
                     <li key={d.name} className="py-4 flex items-baseline gap-4 group">
                       <div className="flex items-center gap-3 flex-1">
                         {ItemIcon && <ItemIcon size={16} strokeWidth={1.5} className="text-ember/70 shrink-0 group-hover:text-ember transition-colors" />}
-                        <span className="font-display text-base sm:text-lg text-bone group-hover:text-ember transition-colors font-normal">{d.name}</span>
+                        <span className="font-heading text-base sm:text-lg text-bone group-hover:text-ember transition-colors font-normal">{d.name}</span>
                       </div>
                       <span className="hidden sm:block flex-1 border-b border-dotted border-bone/20 mb-1" />
-                      <span className="font-display text-base sm:text-lg text-ember whitespace-nowrap font-medium">{"\u20B9"}{d.price}</span>
+                      <span className="font-heading text-base sm:text-lg text-ember whitespace-nowrap font-medium">{"\u20B9"}{d.price}</span>
                     </li>
                   );
                 })}
